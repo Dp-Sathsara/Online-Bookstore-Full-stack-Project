@@ -1,9 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700;900&display=swap');
 
 @layer base {
   :root {
+    /* Font Family */
+    --font-sans: 'Red Hat Display', sans-serif;
     /* Background - Very light gray/blue tint */
     --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
@@ -75,6 +78,7 @@
     @apply border-border;
   }
   body {
+    font-family: 'Red Hat Display', sans-serif;
     @apply bg-background text-foreground font-sans;
   }
 }
