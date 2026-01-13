@@ -7,6 +7,9 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import BookCard from "./components/BookCard";
 import { LoginForm } from "./components/LoginForm"; 
+import { RegisterForm } from "./components/RegisterForm";
+// 👇 අලුතින් හදපු ForgotPasswordForm එක Import කළා
+import { ForgotPasswordForm } from "./components/ForgotPasswordForm"; 
 import BookDetails from "./components/BookDetails";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
@@ -17,8 +20,6 @@ import { BOOKS } from "@/data/books";
 
 const HomePage = () => {
   const navigate = useNavigate();
-
-  // ✅ පේළි දෙකකට හරියන්න පොත් 10ක් (5 x 2) තෝරාගන්නවා
   const featuredBooks = BOOKS.slice(0, 10);
 
   return (
@@ -28,7 +29,6 @@ const HomePage = () => {
         {/* Header Section */}
         <div className="flex justify-between items-end mb-10">
           <div>
-            {/* ✅ Featured Books Title - Red Hat Display & Black Italic Style */}
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase italic leading-none">
               Featured Books
             </h2>
@@ -39,15 +39,15 @@ const HomePage = () => {
           </Badge>
         </div>
         
-        {/* ✅ Grid Section - පේළියට 5ක් (lg:grid-cols-5) */}
+        {/* Grid Section */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
           {featuredBooks.map((book) => (
             <BookCard key={book.id} {...book} />
           ))}
         </div>
 
-        {/* ✅ "View More" Section */}
-        <div className="mt-20 flex flex-col items-center justify-center space-y-6 border-t pt-16">
+        {/* "View More" Section */}
+        <div className="mt-20 flex flex-col items-center justify-center space-y-6 border-t border-primary/10 pt-16">
           <div className="text-center space-y-2">
             <h3 className="text-2xl font-black tracking-tight">Hungry for more?</h3>
             <p className="text-muted-foreground font-medium text-lg">Explore our entire collection of thousands of books.</p>
@@ -73,26 +73,46 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
-        {/* ✅ Wrapper div එකට 'font-sans' (Red Hat Display) එකතු කළා */}
-        <div className="min-h-screen bg-background text-foreground transition-colors duration-300 font-sans">
+        {/* Global Gradient Background */}
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-black text-foreground transition-colors duration-300 font-sans">
           
-          {/* Navbar */}
           <Navbar setSearchQuery={setSearchQuery} books={BOOKS} />
           
           <Routes>
             <Route path="/" element={<HomePage />} /> 
             
-            {/* Book Detail Page */}
             <Route path="/book/:id" element={<BookDetails />} />
             
+            {/* Login Route */}
             <Route 
               path="/login" 
               element={
-                <div className="flex items-center justify-center py-20">
+                <div className="flex items-center justify-center min-h-[80vh] px-4">
                   <LoginForm />
                 </div>
               } 
             />
+
+            {/* Register Route */}
+            <Route 
+              path="/register" 
+              element={
+                <div className="flex items-center justify-center min-h-[80vh] px-4">
+                  <RegisterForm />
+                </div>
+              } 
+            />
+
+            {/* ✅ Forgot Password Route (New) */}
+            <Route 
+              path="/forgot-password" 
+              element={
+                <div className="flex items-center justify-center min-h-[80vh] px-4">
+                  <ForgotPasswordForm />
+                </div>
+              } 
+            />
+
           </Routes>
         </div>
       </Router>
