@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, User, BookOpen, X, Package, Settings, LogOut, LogIn } from "lucide-react"; 
+import { Search, User, BookOpen, X, Package, Settings, LogOut, LogIn } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import {
   DropdownMenu,
@@ -15,30 +15,33 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // ✅ Correct Imports
-import { ModeToggle } from "./mode-toggle"; 
-import { CartDrawer } from "./CartDrawer"; 
+import { ModeToggle } from "./mode-toggle";
+import { CartDrawer } from "./CartDrawer";
+
+import { useBookStore } from "@/store/useBookStore";
 
 interface NavbarProps {
   setSearchQuery: (query: string) => void;
-  books: any[]; 
 }
 
-const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
+const Navbar = ({ setSearchQuery }: NavbarProps) => {
+  const { books } = useBookStore();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Search Logic
   useEffect(() => {
     if (query.trim().length > 0) {
-      const filtered = books.filter(book => 
+      const filtered = books.filter(book =>
         book.title.toLowerCase().includes(query.toLowerCase()) ||
         book.author.toLowerCase().includes(query.toLowerCase()) ||
         book.keywords?.some((k: string) => k.toLowerCase().includes(query.toLowerCase()))
-      ).slice(0, 5); 
-      
+      ).slice(0, 5);
+
       setSuggestions(filtered);
       setIsOpen(true);
     } else {
@@ -61,18 +64,49 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
   const handleSuggestionClick = (bookId: number) => {
     setQuery("");
     setIsOpen(false);
-    navigate(`/book/${bookId}`); 
+    navigate(`/book/${bookId}`);
+  };
+
+  const handleBrowseCollection = () => {
+    if (location.pathname === "/") {
+      const element = document.getElementById("browse-collection");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      navigate("/#browse-collection");
+    }
   };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 font-sans">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 relative">
-        
+
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 font-black text-xl cursor-pointer tracking-tighter uppercase italic">
           <BookOpen className="h-6 w-6 text-primary" />
           <span>BOOK<span className="text-primary">AURA</span></span>
         </Link>
+
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center ml-6 gap-1">
+          <Button
+            variant="ghost"
+            onClick={handleBrowseCollection}
+            className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+          >
+            Browse Collection
+          </Button>
+
+          <Link to="/categories">
+            <Button
+              variant="ghost"
+              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+            >
+              Category
+            </Button>
+          </Link>
+        </div>
 
         {/* Search Bar */}
         <div className="hidden md:flex relative w-full max-sm items-center mx-4" ref={dropdownRef}>
@@ -86,9 +120,9 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
             onFocus={() => query.length > 0 && setIsOpen(true)}
           />
           {query && (
-            <button 
+            <button
               type="button"
-              onClick={() => { setQuery(""); setIsOpen(false); }} 
+              onClick={() => { setQuery(""); setIsOpen(false); }}
               className="absolute right-3 hover:text-primary transition-colors"
             >
               <X className="h-4 w-4 text-muted-foreground" />
@@ -102,8 +136,8 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
                 Quick Results
               </div>
               {suggestions.map((book) => (
-                <div 
-                  key={book.id} 
+                <div
+                  key={book.id}
                   onClick={() => handleSuggestionClick(book.id)}
                   className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer border-b last:border-0 transition-colors group"
                 >
@@ -121,9 +155,9 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
         {/* Action Buttons */}
         <div className="flex items-center gap-1 md:gap-2">
           <ModeToggle />
-          
+
           <CartDrawer />
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-border/50 ml-1 p-0 overflow-hidden">
@@ -141,9 +175,9 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-muted" />
-              
+
               {/* ✅ 1. Profile Settings Route */}
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
                 onClick={() => navigate("/profile")}
               >
@@ -152,24 +186,24 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
               </DropdownMenuItem>
 
               {/* ✅ 2. My Orders Route */}
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
                 onClick={() => navigate("/orders")}
               >
                 <Package className="mr-3 h-4 w-4" />
                 My Orders
               </DropdownMenuItem>
-              
+
               <DropdownMenuSeparator className="bg-muted" />
-              
-              <DropdownMenuItem 
+
+              <DropdownMenuItem
                 className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
                 onClick={() => navigate("/login")}
               >
                 <LogIn className="mr-3 h-4 w-4" />
                 Login
               </DropdownMenuItem>
-              
+
               <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-black uppercase text-[10px] tracking-widest py-3">
                 <LogOut className="mr-3 h-4 w-4" />
                 Logout

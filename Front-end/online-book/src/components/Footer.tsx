@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { 
-  Facebook, Twitter, Instagram, Github, 
-  Mail, Phone, MapPin, ArrowRight 
+import {
+  Facebook, Twitter, Instagram, Github,
+  Mail, Phone, MapPin, ArrowRight
 } from "lucide-react";
 
 const Footer = () => {
@@ -9,7 +9,7 @@ const Footer = () => {
     <footer className="bg-background border-t border-muted/40 font-sans pt-16 pb-8 transition-colors duration-300">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          
+
           {/* Brand Section */}
           <div className="space-y-6">
             <Link to="/" className="flex items-center gap-2">
@@ -17,7 +17,7 @@ const Footer = () => {
                 <span className="text-white font-black italic text-xl">B</span>
               </div>
               <h2 className="text-2xl font-black uppercase italic tracking-tighter">
-                Book<span className="text-primary">Flow</span>
+                BOOK<span className="text-primary">AURA</span>
               </h2>
             </Link>
             <p className="text-muted-foreground text-sm font-medium leading-relaxed">
@@ -87,7 +87,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-muted/30 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-            © 2026 BOOKFLOW. ALL RIGHTS RESERVED.
+            © 2026 BOOKAURA. ALL RIGHTS RESERVED.
           </p>
           <div className="flex gap-6">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" className="h-4 opacity-50 grayscale hover:grayscale-0 transition-all" alt="PayPal" />

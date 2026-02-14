@@ -5,5 +5,5 @@ export interface Book {
   price: number;
   category: string;
   image: string;
-  keywords: string[]; // මේක තමයි අලුත් attribute එක
+  keywords: string[];
 }

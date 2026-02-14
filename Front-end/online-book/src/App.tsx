@@ -1,20 +1,23 @@
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeProvider } from "./components/theme-provider";
 import CheckoutPage from "./components/CheckoutPage";
 
 // ✅ User Pages & Components
-import Navbar from "./components/Navbar"; 
-import Hero from "./components/Hero";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero"; // Kept for other uses if needed, though Home uses it.
 import BookCard from "./components/BookCard";
-import { LoginForm } from "./components/LoginForm"; 
-import { RegisterForm } from "./components/RegisterForm"; 
-import { ForgotPasswordForm } from "./components/ForgotPasswordForm"; 
+import { LoginForm } from "./components/LoginForm";
+import { RegisterForm } from "./components/RegisterForm";
+import { ForgotPasswordForm } from "./components/ForgotPasswordForm";
 import BookDetails from "./components/BookDetails";
-import CategoryPage from "./components/CategoryPage"; 
-import ProfileSettings from "./components/ProfileSettings"; 
-import MyOrders from "./components/MyOrders"; 
-import Footer from "./components/Footer"; // 👈 අලුතින් එක් කළ Footer Import එක
+import CategoryPage from "./components/CategoryPage";
+import ProfileSettings from "./components/ProfileSettings";
+import MyOrders from "./components/MyOrders";
+import Footer from "./components/Footer";
+import Home from "./pages/Home"; // ✅ Import Home Page
+import BrowseCollection from "./pages/BrowseCollection"; // ✅ Import Browse Collection Page
+import CategoriesPage from "./pages/CategoriesPage"; // ✅ Import Categories Page
 
 // ✅ Admin Components & Pages
 import AdminLayout from "./components/admin/AdminLayout";
@@ -24,58 +27,16 @@ import AdminInventory from "./components/admin/AdminInventory";
 import AdminAnalytics from "./components/admin/AdminAnalytics";
 import AdminUsers from "./components/admin/AdminUsers";
 
-import { Button } from "./components/ui/button";
-import { Badge } from "./components/ui/badge";
-import { ArrowRight } from "lucide-react";
+import { Button } from "./components/ui/button"; // Kept if needed by other components
+import { Badge } from "./components/ui/badge"; // Kept if needed
+import { ArrowRight } from "lucide-react"; // Kept if needed
+
+import ScrollToTop from "./components/ScrollToTop"; // ✅ Import ScrollToTop
 
 // ✅ Data Import
-import { BOOKS } from "@/data/books";
+import { BOOKS } from "@/data/books"; // Keeping for Navbar search
 
-const HomePage = () => {
-  const navigate = useNavigate();
-  const featuredBooks = BOOKS.slice(0, 10);
-
-  return (
-    <>
-      <Hero />
-      <main className="container mx-auto px-4 py-16 font-sans">
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase italic leading-none">
-              Featured Books
-            </h2>
-            <p className="text-muted-foreground mt-2 text-lg font-medium">Handpicked favorites just for you</p>
-          </div>
-          <Badge variant="outline" className="hidden sm:flex font-black px-4 py-1.5 border-primary/20 text-primary text-sm uppercase tracking-wider">
-            {BOOKS.length} items found
-          </Badge>
-        </div>
-        
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
-          {featuredBooks.map((book) => (
-            <BookCard key={book.id} {...book} />
-          ))}
-        </div>
-
-        <div className="mt-20 flex flex-col items-center justify-center space-y-6 border-t border-primary/10 pt-16">
-          <div className="text-center space-y-2">
-            <h3 className="text-2xl font-black tracking-tight">Hungry for more?</h3>
-            <p className="text-muted-foreground font-medium text-lg">Explore our entire collection of thousands of books.</p>
-          </div>
-          
-          <Button 
-            size="lg" 
-            className="group px-12 h-16 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xl rounded-2xl transition-all duration-300 shadow-2xl shadow-primary/30 uppercase tracking-widest"
-            onClick={() => navigate("/")} 
-          >
-            Explore Full Collection
-            <ArrowRight className="ml-3 h-7 w-7 group-hover:translate-x-2 transition-transform" />
-          </Button>
-        </div>
-      </main>
-    </>
-  );
-};
+// Removed inline HomePage component
 
 const Layout = () => {
   const location = useLocation();
@@ -83,20 +44,37 @@ const Layout = () => {
 
   const hideNavbarRoutes = ["/login", "/register", "/forgot-password"];
   const isAdminRoute = location.pathname.startsWith("/admin");
-  
+
   // ✅ Navbar සහ Footer පෙන්විය යුතුද යන්න තීරණය කිරීම
   const shouldShowHeaderFooter = !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
 
+  // Handle hash scrolling for Browse Collection interaction
+  useEffect(() => {
+    if (location.hash === '#browse-collection') {
+      const element = document.getElementById('browse-collection');
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [location]);
+
   return (
     <div className={`min-h-screen flex flex-col ${isAdminRoute ? 'bg-background' : 'bg-gradient-to-br from-blue-50 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-black'} text-foreground transition-colors duration-300 font-sans`}>
-      
+
+      {/* Scroll To Top */}
+      <ScrollToTop />
+
       {/* Navbar එක පෙන්වීම */}
-      {shouldShowHeaderFooter && <Navbar setSearchQuery={setSearchQuery} books={BOOKS} />}
-      
+      {shouldShowHeaderFooter && <Navbar setSearchQuery={setSearchQuery} />}
+
       {/* ප්‍රධාන Content එක */}
       <div className="flex-grow">
         <Routes>
-          <Route path="/" element={<HomePage />} /> 
+          <Route path="/" element={<Home />} />
+          <Route path="/browse-collection" element={<BrowseCollection />} />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/book/:id" element={<BookDetails />} />
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
