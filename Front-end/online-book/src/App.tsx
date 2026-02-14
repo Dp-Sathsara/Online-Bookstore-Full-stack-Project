@@ -1,16 +1,18 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { ThemeProvider } from "./components/theme-provider";
+import CheckoutPage from "./components/CheckoutPage";
 
 // ✅ Components Imports
 import Navbar from "./components/Navbar"; 
 import Hero from "./components/Hero";
 import BookCard from "./components/BookCard";
 import { LoginForm } from "./components/LoginForm"; 
-import { RegisterForm } from "./components/RegisterForm";
-// 👇 අලුතින් හදපු ForgotPasswordForm එක Import කළා
+import { RegisterForm } from "./components/RegisterForm"; 
 import { ForgotPasswordForm } from "./components/ForgotPasswordForm"; 
 import BookDetails from "./components/BookDetails";
+// 👇 අලුත් Import එක: Category Page
+import CategoryPage from "./components/CategoryPage"; 
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
 import { ArrowRight } from "lucide-react";
@@ -67,54 +69,74 @@ const HomePage = () => {
   );
 };
 
-function App() {
+// ✅ Navbar Control Component
+const Layout = () => {
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Navbar එක හංගන්න ඕන පිටු ලිස්ට් එක
+  const hideNavbarRoutes = ["/login", "/register", "/forgot-password"];
+  
+  // දැනට ඉන්න පිටුව අර ලිස්ට් එකේ තියෙනවද බලනවා
+  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-black text-foreground transition-colors duration-300 font-sans">
+      
+      {/* Login පිටුවේ නැත්නම් විතරක් Navbar එක පෙන්වන්න */}
+      {shouldShowNavbar && <Navbar setSearchQuery={setSearchQuery} books={BOOKS} />}
+      
+      <Routes>
+        <Route path="/" element={<HomePage />} /> 
+        
+        <Route path="/book/:id" element={<BookDetails />} />
+
+        {/* ✅ අලුත් Category Page Route එක */}
+        {/* :category කියන තැනට URL එකේ එන නම (Ex: fiction) වැටෙනවා */}
+        <Route path="/category/:category" element={<CategoryPage />} />
+        
+        <Route path="/checkout" element={<CheckoutPage />} />
+
+        {/* Login Route */}
+        <Route 
+          path="/login" 
+          element={
+            <div className="flex items-center justify-center min-h-[80vh] px-4">
+              <LoginForm />
+            </div>
+          } 
+        />
+
+        {/* Register Route */}
+        <Route 
+          path="/register" 
+          element={
+            <div className="flex items-center justify-center min-h-[80vh] px-4">
+              <RegisterForm />
+            </div>
+          } 
+        />
+
+        {/* Forgot Password Route */}
+        <Route 
+          path="/forgot-password" 
+          element={
+            <div className="flex items-center justify-center min-h-[80vh] px-4">
+              <ForgotPasswordForm />
+            </div>
+          } 
+        />
+      </Routes>
+    </div>
+  );
+};
+
+function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
-        {/* Global Gradient Background */}
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-white dark:from-slate-950 dark:via-slate-900 dark:to-black text-foreground transition-colors duration-300 font-sans">
-          
-          <Navbar setSearchQuery={setSearchQuery} books={BOOKS} />
-          
-          <Routes>
-            <Route path="/" element={<HomePage />} /> 
-            
-            <Route path="/book/:id" element={<BookDetails />} />
-            
-            {/* Login Route */}
-            <Route 
-              path="/login" 
-              element={
-                <div className="flex items-center justify-center min-h-[80vh] px-4">
-                  <LoginForm />
-                </div>
-              } 
-            />
-
-            {/* Register Route */}
-            <Route 
-              path="/register" 
-              element={
-                <div className="flex items-center justify-center min-h-[80vh] px-4">
-                  <RegisterForm />
-                </div>
-              } 
-            />
-
-            {/* ✅ Forgot Password Route (New) */}
-            <Route 
-              path="/forgot-password" 
-              element={
-                <div className="flex items-center justify-center min-h-[80vh] px-4">
-                  <ForgotPasswordForm />
-                </div>
-              } 
-            />
-
-          </Routes>
-        </div>
+        {/* Router ඇතුළේ Layout Component එක render කරනවා */}
+        <Layout />
       </Router>
     </ThemeProvider>
   );
