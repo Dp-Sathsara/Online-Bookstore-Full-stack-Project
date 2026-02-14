@@ -7,18 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle2, Check, X } from "lucide-react";
+// ✅ 1. Password Input එක Import කරන්න
+import { PasswordInput } from "@/components/ui/password-input"; 
 
-// ✅ Validation Schemas
-// Step 1: Email Validation
+// Validation Schemas
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
 
-// Step 2: Password Reset Validation
 const resetSchema = z.object({
   otp: z.string().min(4, "Invalid OTP code"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -27,38 +32,44 @@ const resetSchema = z.object({
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1 = Email Input, 2 = Reset Password
+  const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
-  // Forms Setup
   const emailForm = useForm<z.infer<typeof emailSchema>>({ resolver: zodResolver(emailSchema) });
-  const resetForm = useForm<z.infer<typeof resetSchema>>({ resolver: zodResolver(resetSchema) });
+  const resetForm = useForm<z.infer<typeof resetSchema>>({ 
+    resolver: zodResolver(resetSchema),
+    mode: "onChange" 
+  });
 
-  // ✅ Step 1: Send OTP Function
+  // ✅ 2. Password එක Live Watch කරන්න
+  const password = resetForm.watch("password", "");
+
+  // ✅ 3. Validation Checklist Logic
+  const validations = [
+    { label: "At least 8 characters", valid: password.length >= 8 },
+    { label: "At least one uppercase letter", valid: /[A-Z]/.test(password) },
+    { label: "At least one lowercase letter", valid: /[a-z]/.test(password) },
+    { label: "At least one number", valid: /[0-9]/.test(password) },
+    { label: "At least one special character (!@#$)", valid: /[^A-Za-z0-9]/.test(password) },
+  ];
+
   const onSendOtp = async (data: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
-    
-    // TODO: Backend API call to send OTP
     console.log("Sending OTP to:", data.email);
     setUserEmail(data.email);
-
     setTimeout(() => {
       setIsLoading(false);
-      setStep(2); // ඊළඟ පියවරට මාරු වෙන්න
+      setStep(2);
     }, 1500);
   };
 
-  // ✅ Step 2: Reset Password Function
   const onResetPassword = async (data: z.infer<typeof resetSchema>) => {
     setIsLoading(true);
-
-    // TODO: Backend API call to verify OTP and update password
     console.log("Resetting Password:", { email: userEmail, ...data });
-
     setTimeout(() => {
       setIsLoading(false);
-      navigate("/login"); // සාර්ථක නම් Login එකට යවන්න
+      navigate("/login");
     }, 2000);
   };
 
@@ -76,7 +87,7 @@ export function ForgotPasswordForm() {
       </CardHeader>
       
       <CardContent>
-        {/* 👉 STEP 1: Email Input View */}
+        {/* 👉 STEP 1: Email Input */}
         {step === 1 && (
           <form onSubmit={emailForm.handleSubmit(onSendOtp)} className="space-y-4">
             <div className="space-y-2">
@@ -93,7 +104,7 @@ export function ForgotPasswordForm() {
           </form>
         )}
 
-        {/* 👉 STEP 2: OTP & New Password View */}
+        {/* 👉 STEP 2: OTP & New Password [UPDATED] */}
         {step === 2 && (
           <form onSubmit={resetForm.handleSubmit(onResetPassword)} className="space-y-4">
             <div className="space-y-2">
@@ -106,15 +117,31 @@ export function ForgotPasswordForm() {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="font-bold">New Password</Label>
-              <Input id="password" type="password" {...resetForm.register("password")} />
-              {resetForm.formState.errors.password && (
-                <p className="text-red-500 text-xs font-bold">{resetForm.formState.errors.password.message}</p>
-              )}
+              
+              {/* ✅ Eye Icon එක සහිත Password Input */}
+              <PasswordInput id="password" {...resetForm.register("password")} />
+              
+              {/* ✅ Live Validation Checklist */}
+              <div className="space-y-1.5 pt-1 p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs font-bold text-muted-foreground mb-2">Password must contain:</p>
+                {validations.map((rule, index) => (
+                  <div key={index} className="flex items-center space-x-2 text-xs">
+                    {rule.valid ? (
+                      <Check className="h-3 w-3 text-green-600 font-bold" />
+                    ) : (
+                      <X className="h-3 w-3 text-red-500" />
+                    )}
+                    <span className={rule.valid ? "text-green-600 font-medium" : "text-muted-foreground"}>
+                      {rule.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="font-bold">Confirm Password</Label>
-              <Input id="confirmPassword" type="password" {...resetForm.register("confirmPassword")} />
+              <PasswordInput id="confirmPassword" {...resetForm.register("confirmPassword")} />
               {resetForm.formState.errors.confirmPassword && (
                 <p className="text-red-500 text-xs font-bold">{resetForm.formState.errors.confirmPassword.message}</p>
               )}

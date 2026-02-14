@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// ✅ FIX: Named Exports ({ }) සහ Relative Paths (./) භාවිතා කිරීම
+// ✅ Correct Imports
 import { ModeToggle } from "./mode-toggle"; 
 import { CartDrawer } from "./CartDrawer"; 
 
@@ -64,13 +64,13 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 font-sans">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 relative">
         
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl cursor-pointer">
-          <BookOpen className="text-primary" />
-          <span className="tracking-tighter">BOOK<span className="text-primary">SHELF</span></span>
+        <Link to="/" className="flex items-center gap-2 font-black text-xl cursor-pointer tracking-tighter">
+          <BookOpen className="h-6 w-6 text-primary" />
+          <span>BOOK<span className="text-primary">AURA</span></span>
         </Link>
 
         {/* Search Bar */}
@@ -79,7 +79,7 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
           <Input
             type="search"
             placeholder="Search books..."
-            className="pl-9 bg-muted focus-visible:ring-primary shadow-none"
+            className="pl-9 bg-muted/50 focus-visible:ring-primary shadow-none h-10 rounded-full"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => query.length > 0 && setIsOpen(true)}
@@ -88,7 +88,7 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
             <button 
               type="button"
               onClick={() => { setQuery(""); setIsOpen(false); }} 
-              className="absolute right-2.5 hover:text-primary transition-colors"
+              className="absolute right-3 hover:text-primary transition-colors"
             >
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -96,7 +96,7 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
 
           {/* SUGGESTION BOX */}
           {isOpen && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 w-full bg-card border rounded-b-xl shadow-2xl mt-2 overflow-hidden animate-in fade-in slide-in-from-top-2 z-[100]">
+            <div className="absolute top-full left-0 w-full bg-card border rounded-xl shadow-2xl mt-2 overflow-hidden animate-in fade-in slide-in-from-top-2 z-[100]">
               <div className="p-2 text-[10px] font-bold text-muted-foreground border-b uppercase tracking-wider bg-muted/30">
                 Quick Results
               </div>
@@ -106,10 +106,10 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
                   onClick={() => handleSuggestionClick(book.id)}
                   className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer border-b last:border-0 transition-colors group"
                 >
-                  <img src={book.image} alt={book.title} className="h-12 w-9 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" />
+                  <img src={book.image} alt={book.title} className="h-10 w-8 object-cover rounded shadow-sm group-hover:scale-105 transition-transform" />
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-foreground line-clamp-1">{book.title}</span>
-                    <span className="text-xs text-muted-foreground">{book.author}</span>
+                    <span className="text-sm font-bold text-foreground line-clamp-1">{book.title}</span>
+                    <span className="text-xs text-muted-foreground">by {book.author}</span>
                   </div>
                 </div>
               ))}
@@ -118,16 +118,18 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1 md:gap-2">
           <ModeToggle />
+          
+          {/* ✅ Cart Drawer Added Here */}
           <CartDrawer />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-border">
-                <Avatar className="h-10 w-10">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-border/50 ml-1">
+                <Avatar className="h-9 w-9">
                   <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-                  <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                  <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

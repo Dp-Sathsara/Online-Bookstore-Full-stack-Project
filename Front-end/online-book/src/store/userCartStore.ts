@@ -11,13 +11,17 @@ interface Book {
 
 interface CartItem extends Book {
   quantity: number;
+  selected: boolean; // 👈 අලුතින් එකතු කළා
 }
 
 interface CartStore {
   cart: CartItem[];
-  addToCart: (book: Book, qty?: number) => void; // qty එකක් එවන්නත් පුළුවන් විදියට හැදුවා
+  addToCart: (book: Book, qty?: number) => void;
   removeFromCart: (id: number) => void;
   removeItemCompletely: (id: number) => void;
+  toggleSelectItem: (id: number) => void; // 👈 එකක් තෝරන්න
+  toggleSelectAll: (isSelected: boolean) => void; // 👈 ඔක්කොම තෝරන්න
+  clearSelectedItems: () => void; // 👈 Checkout වූ ඒවා පමණක් ඉවත් කරන්න
   clearCart: () => void;
   totalPrice: () => number;
 }
@@ -38,9 +42,24 @@ export const useCartStore = create<CartStore>()(
             ),
           });
         } else {
-          set({ cart: [...currentCart, { ...book, quantity: qty }] });
+          // අලුතින් add වෙද්දී selected true විදියටම එනවා
+          set({ cart: [...currentCart, { ...book, quantity: qty, selected: true }] });
         }
       },
+
+      toggleSelectItem: (id) => set((state) => ({
+        cart: state.cart.map((item) =>
+          item.id === id ? { ...item, selected: !item.selected } : item
+        )
+      })),
+
+      toggleSelectAll: (isSelected) => set((state) => ({
+        cart: state.cart.map((item) => ({ ...item, selected: isSelected }))
+      })),
+
+      clearSelectedItems: () => set((state) => ({
+        cart: state.cart.filter((item) => !item.selected)
+      })),
 
       removeFromCart: (id) => {
         const currentCart = get().cart;
@@ -64,11 +83,14 @@ export const useCartStore = create<CartStore>()(
       clearCart: () => set({ cart: [] }),
 
       totalPrice: () => {
-        return get().cart.reduce((total, item) => total + item.price * item.quantity, 0);
+        // ✅ තෝරාගත් (Selected) ඒවායේ මුදල පමණක් ගණනය කරයි
+        return get().cart
+          .filter(item => item.selected)
+          .reduce((total, item) => total + item.price * item.quantity, 0);
       },
     }),
     {
-      name: 'user-cart-storage', // LocalStorage එකේ මේ නමින් සේව් වෙන්නේ
+      name: 'user-cart-storage',
       storage: createJSONStorage(() => localStorage),
     }
   )
