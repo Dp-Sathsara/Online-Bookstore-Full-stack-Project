@@ -34,18 +34,18 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 const CheckoutPage = () => {
   const navigate = useNavigate();
   
-  // ✅ Store එකෙන් අවශ්‍ය දේවල් ගන්නවා (clearSelectedItems එකත් එක්ක)
-  const { cart, totalPrice, clearSelectedItems } = useCartStore();
+  // ✅ Store එකෙන් අවශ්‍ය දේවල් ගන්නවා (addOrder එකත් එක්ක)
+  const { cart, totalPrice, clearSelectedItems, addOrder } = useCartStore();
   
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
 
-  // ✅ 1. Checkout කරන්නේ Select කරපු items විතරයි
+  // ✅ Checkout කරන්නේ Select කරපු items විතරයි
   const selectedItems = cart.filter(item => item.selected);
   
   const shippingCost = 450;
-  const subTotal = totalPrice(); // Store එකෙන් දැන් එන්නේ selected ඒවයේ total එක විතරයි
+  const subTotal = totalPrice(); 
   const finalTotal = subTotal + shippingCost;
 
   const form = useForm<CheckoutFormValues>({
@@ -62,10 +62,19 @@ const CheckoutPage = () => {
       setIsLoading(false);
       const newOrderNum = "ORD-" + Math.floor(100000 + Math.random() * 900000);
       setOrderNumber(newOrderNum);
+
+      // ✅ 1. නව Order එක History එකට සේව් කිරීම
+      addOrder({
+        orderId: newOrderNum,
+        date: new Date().toLocaleDateString(), // අද දිනය
+        items: selectedItems, // තෝරාගත් පොත් ටික පමණයි
+        totalAmount: finalTotal,
+        status: "Processing"
+      });
       
       setIsSuccessOpen(true);
       
-      // ✅ 2. මෙතනදී selected items පමණක් ඉවත් කරනවා
+      // ✅ 2. Selected items පමණක් cart එකෙන් ඉවත් කරනවා
       clearSelectedItems();
     }, 2000);
   };
@@ -75,14 +84,13 @@ const CheckoutPage = () => {
     navigate("/");
   };
 
-  // ✅ 3. තෝරාගත් items නැත්නම් Empty state එකක් පෙන්වනවා
   if (selectedItems.length === 0 && !isSuccessOpen) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4 font-sans">
         <div className="bg-muted p-6 rounded-full">
             <ShoppingBag className="h-12 w-12 text-muted-foreground" />
         </div>
-        <h2 className="text-2xl font-black uppercase">No items selected</h2>
+        <h2 className="text-2xl font-black uppercase tracking-tighter">No items selected</h2>
         <p className="text-muted-foreground font-medium">Please select items from your cart to proceed with checkout.</p>
         <Button onClick={() => navigate("/")} variant="default" className="font-bold uppercase tracking-widest px-8 h-12">Back to Shop</Button>
       </div>
@@ -95,7 +103,7 @@ const CheckoutPage = () => {
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Cart
       </Button>
 
-      <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-8 italic text-foreground">Checkout</h1>
+      <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-8 italic text-foreground leading-none">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -103,56 +111,56 @@ const CheckoutPage = () => {
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={form.handleSubmit(onSubmit)} id="checkout-form">
             
-            <Card className="shadow-md border-none rounded-2xl">
-              <CardHeader>
+            <Card className="shadow-md border-none rounded-2xl overflow-hidden">
+              <CardHeader className="bg-muted/10 border-b">
                 <CardTitle className="flex items-center gap-2 text-xl font-bold uppercase tracking-tight">
                   <MapPin className="text-primary h-5 w-5" /> Shipping Details
                 </CardTitle>
                 <CardDescription>Enter your delivery address.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName" className="font-bold text-xs uppercase tracking-wider">Full Name</Label>
-                    <Input id="fullName" placeholder="John Doe" {...form.register("fullName")} className="rounded-xl bg-muted/30 border-none h-11" />
-                    {form.formState.errors.fullName && <p className="text-red-500 text-[10px] font-bold uppercase">{form.formState.errors.fullName.message}</p>}
+                    <Label htmlFor="fullName" className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Full Name</Label>
+                    <Input id="fullName" placeholder="John Doe" {...form.register("fullName")} className="rounded-xl bg-muted/30 border-none h-11 focus-visible:ring-primary" />
+                    {form.formState.errors.fullName && <p className="text-red-500 text-[10px] font-bold uppercase tracking-tighter">{form.formState.errors.fullName.message}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="font-bold text-xs uppercase tracking-wider">Phone Number</Label>
-                    <Input id="phone" placeholder="077xxxxxxx" {...form.register("phone")} className="rounded-xl bg-muted/30 border-none h-11" />
-                    {form.formState.errors.phone && <p className="text-red-500 text-[10px] font-bold uppercase">{form.formState.errors.phone.message}</p>}
+                    <Label htmlFor="phone" className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Phone Number</Label>
+                    <Input id="phone" placeholder="077xxxxxxx" {...form.register("phone")} className="rounded-xl bg-muted/30 border-none h-11 focus-visible:ring-primary" />
+                    {form.formState.errors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-tighter">{form.formState.errors.phone.message}</p>}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address" className="font-bold text-xs uppercase tracking-wider">Address</Label>
-                  <Input id="address" placeholder="123, Main Street" {...form.register("address")} className="rounded-xl bg-muted/30 border-none h-11" />
-                  {form.formState.errors.address && <p className="text-red-500 text-[10px] font-bold uppercase">{form.formState.errors.address.message}</p>}
+                  <Label htmlFor="address" className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Street Address</Label>
+                  <Input id="address" placeholder="123, Main Street" {...form.register("address")} className="rounded-xl bg-muted/30 border-none h-11 focus-visible:ring-primary" />
+                  {form.formState.errors.address && <p className="text-red-500 text-[10px] font-bold uppercase tracking-tighter">{form.formState.errors.address.message}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="city" className="font-bold text-xs uppercase tracking-wider">City</Label>
-                    <Input id="city" placeholder="Colombo" {...form.register("city")} className="rounded-xl bg-muted/30 border-none h-11" />
-                    {form.formState.errors.city && <p className="text-red-500 text-[10px] font-bold uppercase">{form.formState.errors.city.message}</p>}
+                    <Label htmlFor="city" className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">City</Label>
+                    <Input id="city" placeholder="Colombo" {...form.register("city")} className="rounded-xl bg-muted/30 border-none h-11 focus-visible:ring-primary" />
+                    {form.formState.errors.city && <p className="text-red-500 text-[10px] font-bold uppercase tracking-tighter">{form.formState.errors.city.message}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="postalCode" className="font-bold text-xs uppercase tracking-wider">Postal Code</Label>
-                    <Input id="postalCode" placeholder="10100" {...form.register("postalCode")} className="rounded-xl bg-muted/30 border-none h-11" />
-                    {form.formState.errors.postalCode && <p className="text-red-500 text-[10px] font-bold uppercase">{form.formState.errors.postalCode.message}</p>}
+                    <Label htmlFor="postalCode" className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Postal Code</Label>
+                    <Input id="postalCode" placeholder="10100" {...form.register("postalCode")} className="rounded-xl bg-muted/30 border-none h-11 focus-visible:ring-primary" />
+                    {form.formState.errors.postalCode && <p className="text-red-500 text-[10px] font-bold uppercase tracking-tighter">{form.formState.errors.postalCode.message}</p>}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-md border-none mt-6 rounded-2xl">
-              <CardHeader>
+            <Card className="shadow-md border-none mt-6 rounded-2xl overflow-hidden">
+              <CardHeader className="bg-muted/10 border-b">
                 <CardTitle className="flex items-center gap-2 text-xl font-bold uppercase tracking-tight">
                   <CreditCard className="text-primary h-5 w-5" /> Payment Method
                 </CardTitle>
-                <CardDescription>Select how you want to pay.</CardDescription>
+                <CardDescription>Select how you want to pay for your order.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <RadioGroup 
                   defaultValue="cod" 
                   onValueChange={(val) => form.setValue("paymentMethod", val as "card" | "cod")}
@@ -162,10 +170,10 @@ const CheckoutPage = () => {
                     <RadioGroupItem value="card" id="card" className="peer sr-only" />
                     <Label
                       htmlFor="card"
-                      className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                      className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all duration-300"
                     >
                       <CreditCard className="mb-3 h-6 w-6" />
-                      <span className="font-bold uppercase text-xs tracking-widest">Card Payment</span>
+                      <span className="font-black uppercase text-[10px] tracking-widest">Card Payment</span>
                     </Label>
                   </div>
 
@@ -173,10 +181,10 @@ const CheckoutPage = () => {
                     <RadioGroupItem value="cod" id="cod" className="peer sr-only" />
                     <Label
                       htmlFor="cod"
-                      className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                      className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all duration-300"
                     >
                       <Banknote className="mb-3 h-6 w-6" />
-                      <span className="font-bold uppercase text-xs tracking-widest">Cash On Delivery</span>
+                      <span className="font-black uppercase text-[10px] tracking-widest">Cash On Delivery</span>
                     </Label>
                   </div>
                 </RadioGroup>
@@ -189,38 +197,38 @@ const CheckoutPage = () => {
         <div className="lg:col-span-1">
           <Card className="shadow-lg border-primary/10 sticky top-24 rounded-2xl overflow-hidden">
             <CardHeader className="bg-muted/30 border-b">
-              <CardTitle className="text-lg font-bold uppercase tracking-tight">Order Summary</CardTitle>
-              <CardDescription className="font-medium">{selectedItems.length} selected items</CardDescription>
+              <CardTitle className="text-lg font-black uppercase tracking-tight italic">Order Summary</CardTitle>
+              <CardDescription className="font-bold uppercase text-[10px] tracking-wider">{selectedItems.length} selected items</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
               <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                 {selectedItems.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
-                    <div className="flex flex-col">
+                    <div className="flex flex-col max-w-[70%]">
                       <span className="text-foreground font-bold line-clamp-1 uppercase text-xs">
                         {item.title}
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-black tracking-widest uppercase">Qty: {item.quantity}</span>
+                      <span className="text-[10px] text-muted-foreground font-black tracking-widest uppercase italic">Qty: {item.quantity}</span>
                     </div>
                     <span className="font-black text-primary text-xs">{(item.price * item.quantity).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
               
-              <Separator />
+              <Separator className="bg-primary/5" />
               
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-sm font-medium">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground font-medium">Subtotal</span>
+                  <span className="text-muted-foreground uppercase text-[11px] font-bold">Subtotal</span>
                   <span className="font-black">LKR {subTotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between font-medium">
-                  <span className="text-muted-foreground">Shipping Fee</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground uppercase text-[11px] font-bold">Shipping Fee</span>
                   <span className="text-green-600 font-black">+ LKR {shippingCost.toLocaleString()}</span>
                 </div>
               </div>
 
-              <Separator className="bg-primary/10" />
+              <Separator className="bg-primary/10 h-0.5" />
 
               <div className="flex justify-between items-center py-2">
                 <span className="text-lg font-black uppercase italic tracking-tighter">Total Amount</span>
@@ -239,9 +247,9 @@ const CheckoutPage = () => {
               </Button>
             </CardFooter>
           </Card>
-          <div className="flex items-center justify-center gap-2 mt-4 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-            <Truck className="h-3 w-3" /> 
-            <span>Verified Secure Delivery</span>
+          <div className="flex items-center justify-center gap-2 mt-4 text-[10px] text-muted-foreground font-black uppercase tracking-widest italic">
+            <Truck className="h-3 w-3 text-primary" /> 
+            <span>Verified Secure & Fast Delivery</span>
           </div>
         </div>
       </div>
@@ -275,7 +283,7 @@ const CheckoutPage = () => {
                  <DialogTitle className="text-3xl font-black tracking-tighter text-foreground uppercase italic leading-none text-center">
                     Order <span className="text-green-600">Placed!</span>
                  </DialogTitle>
-                 <DialogDescription className="text-lg font-medium text-muted-foreground max-w-[280px] text-center italic">
+                 <DialogDescription className="text-lg font-medium text-muted-foreground max-w-[280px] text-center italic leading-tight">
                     Thank you for your purchase. Your books are on the way!
                  </DialogDescription>
               </div>
@@ -289,7 +297,7 @@ const CheckoutPage = () => {
                 </div>
             </div>
 
-            <p className="text-[11px] text-muted-foreground mt-5 px-4 leading-relaxed max-w-[300px] text-center font-medium">
+            <p className="text-[11px] text-muted-foreground mt-5 px-4 leading-relaxed max-w-[300px] text-center font-bold">
               A confirmation email has been sent to your inbox. You can track your order using the reference above.
             </p>
 
