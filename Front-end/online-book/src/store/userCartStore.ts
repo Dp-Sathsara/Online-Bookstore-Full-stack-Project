@@ -11,18 +11,30 @@ interface Book {
 
 interface CartItem extends Book {
   quantity: number;
-  selected: boolean; // 👈 අලුතින් එකතු කළා
+  selected: boolean;
+}
+
+interface Order {
+  orderId: string;
+  date: string;
+  items: CartItem[];
+  totalAmount: number;
+  status: "Processing" | "Shipped" | "Delivered";
 }
 
 interface CartStore {
   cart: CartItem[];
+  orders: Order[];
   addToCart: (book: Book, qty?: number) => void;
   removeFromCart: (id: number) => void;
   removeItemCompletely: (id: number) => void;
-  toggleSelectItem: (id: number) => void; // 👈 එකක් තෝරන්න
-  toggleSelectAll: (isSelected: boolean) => void; // 👈 ඔක්කොම තෝරන්න
-  clearSelectedItems: () => void; // 👈 Checkout වූ ඒවා පමණක් ඉවත් කරන්න
+  toggleSelectItem: (id: number) => void;
+  toggleSelectAll: (isSelected: boolean) => void;
+  clearSelectedItems: () => void;
   clearCart: () => void;
+  addOrder: (order: Order) => void;
+  // ✅ අලුතින් එකතු කළ කොටස: Order Status එක වෙනස් කිරීමට
+  updateOrderStatus: (orderId: string, newStatus: "Processing" | "Shipped" | "Delivered") => void;
   totalPrice: () => number;
 }
 
@@ -30,7 +42,8 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       cart: [],
-      
+      orders: [],
+
       addToCart: (book, qty = 1) => {
         const currentCart = get().cart;
         const isBookInCart = currentCart.find((item) => item.id === book.id);
@@ -42,7 +55,6 @@ export const useCartStore = create<CartStore>()(
             ),
           });
         } else {
-          // අලුතින් add වෙද්දී selected true විදියටම එනවා
           set({ cart: [...currentCart, { ...book, quantity: qty, selected: true }] });
         }
       },
@@ -82,8 +94,18 @@ export const useCartStore = create<CartStore>()(
 
       clearCart: () => set({ cart: [] }),
 
+      addOrder: (order) => set((state) => ({
+        orders: [order, ...state.orders]
+      })),
+
+      // ✅ ලැබෙන Order ID එක අනුව Status එක පමණක් මාරු කරන Logic එක
+      updateOrderStatus: (orderId, newStatus) => set((state) => ({
+        orders: state.orders.map((order) =>
+          order.orderId === orderId ? { ...order, status: newStatus } : order
+        )
+      })),
+
       totalPrice: () => {
-        // ✅ තෝරාගත් (Selected) ඒවායේ මුදල පමණක් ගණනය කරයි
         return get().cart
           .filter(item => item.selected)
           .reduce((total, item) => total + item.price * item.quantity, 0);

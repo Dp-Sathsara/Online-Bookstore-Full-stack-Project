@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, User, BookOpen, X } from "lucide-react";
+import { Search, User, BookOpen, X, Package, Settings, LogOut, LogIn } from "lucide-react"; 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,13 +69,13 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 relative">
         
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-black text-xl cursor-pointer tracking-tighter">
+        <Link to="/" className="flex items-center gap-2 font-black text-xl cursor-pointer tracking-tighter uppercase italic">
           <BookOpen className="h-6 w-6 text-primary" />
           <span>BOOK<span className="text-primary">AURA</span></span>
         </Link>
 
         {/* Search Bar */}
-        <div className="hidden md:flex relative w-full max-w-sm items-center mx-4" ref={dropdownRef}>
+        <div className="hidden md:flex relative w-full max-sm items-center mx-4" ref={dropdownRef}>
           <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
@@ -121,31 +122,56 @@ const Navbar = ({ setSearchQuery, books }: NavbarProps) => {
         <div className="flex items-center gap-1 md:gap-2">
           <ModeToggle />
           
-          {/* ✅ Cart Drawer Added Here */}
           <CartDrawer />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-border/50 ml-1">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-border/50 ml-1 p-0 overflow-hidden">
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="https://github.com/shadcn.png" alt="User" />
                   <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
+            <DropdownMenuContent className="w-56 font-sans rounded-[1.2rem] shadow-2xl border-none" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal p-4">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">User Name</p>
-                  <p className="text-xs leading-none text-muted-foreground">user@example.com</p>
+                  <p className="text-sm font-black uppercase italic tracking-tight leading-none">Desitha Sathsara</p>
+                  <p className="text-[10px] font-bold leading-none text-muted-foreground uppercase tracking-widest mt-1">desitha@example.com</p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/login")}>Login</DropdownMenuItem>
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>My Orders</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer font-medium">
+              <DropdownMenuSeparator className="bg-muted" />
+              
+              {/* ✅ 1. Profile Settings Route */}
+              <DropdownMenuItem 
+                className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
+                onClick={() => navigate("/profile")}
+              >
+                <Settings className="mr-3 h-4 w-4" />
+                Profile Settings
+              </DropdownMenuItem>
+
+              {/* ✅ 2. My Orders Route */}
+              <DropdownMenuItem 
+                className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
+                onClick={() => navigate("/orders")}
+              >
+                <Package className="mr-3 h-4 w-4" />
+                My Orders
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator className="bg-muted" />
+              
+              <DropdownMenuItem 
+                className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
+                onClick={() => navigate("/login")}
+              >
+                <LogIn className="mr-3 h-4 w-4" />
+                Login
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-black uppercase text-[10px] tracking-widest py-3">
+                <LogOut className="mr-3 h-4 w-4" />
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>

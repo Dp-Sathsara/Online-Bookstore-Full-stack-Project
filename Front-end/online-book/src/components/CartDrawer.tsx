@@ -1,7 +1,7 @@
 import { ShoppingCart, Plus, Minus, Trash2, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/store/userCartStore";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox"; // 👈 අලුතින්
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
   SheetContent,
@@ -28,31 +28,32 @@ export function CartDrawer() {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative hover:bg-muted transition-colors">
-          <ShoppingCart className="h-6 w-6" />
+          <ShoppingCart className="h-5 w-5" />
           {cartCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-primary-foreground animate-in zoom-in border-2 border-background font-bold text-[10px]">
+            <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 bg-primary text-white border border-background font-bold text-[8px]">
               {cartCount}
             </Badge>
           )}
         </Button>
       </SheetTrigger>
       
-      <SheetContent className="w-full sm:max-w-md flex flex-col h-full bg-background font-sans">
+      {/* Drawer එකේ width එක වැඩි කළා (sm:max-w-lg) */}
+      <SheetContent className="w-full sm:max-w-lg flex flex-col h-full bg-background font-sans">
         <SheetHeader className="pb-2">
-          <SheetTitle className="flex items-center gap-2 text-2xl font-black uppercase tracking-tight italic">
-            <ShoppingCart className="h-6 w-6 text-primary" />
-            Your Cart
+          <SheetTitle className="flex items-center gap-2 text-lg font-black uppercase tracking-tight italic">
+            <ShoppingCart className="h-5 w-5 text-primary" />
+            Cart
           </SheetTitle>
           
-          {/* ✅ Select All Option */}
           {cart.length > 0 && (
-            <div className="flex items-center gap-2 py-2">
+            <div className="flex items-center gap-2 py-1">
               <Checkbox 
                 id="selectAll" 
                 checked={isAllSelected}
                 onCheckedChange={(checked) => toggleSelectAll(!!checked)}
+                className="h-3 w-3"
               />
-              <label htmlFor="selectAll" className="text-sm font-bold cursor-pointer text-muted-foreground">
+              <label htmlFor="selectAll" className="text-[10px] font-bold cursor-pointer text-muted-foreground uppercase tracking-widest">
                 Select All ({cart.length})
               </label>
             </div>
@@ -63,55 +64,52 @@ export function CartDrawer() {
 
         <div className="flex-1 overflow-hidden relative">
           {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full space-y-4">
-              <div className="p-6 bg-muted/50 rounded-full">
-                <ShoppingCart className="h-12 w-12 text-muted-foreground/40" />
-              </div>
-              <p className="text-lg font-bold text-center">Your cart is empty</p>
-              <SheetClose asChild>
-                <Button variant="default" className="font-bold">Start Shopping</Button>
-              </SheetClose>
+            <div className="flex flex-col items-center justify-center h-full space-y-2">
+              <ShoppingCart className="h-8 w-8 text-muted-foreground/20" />
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Empty Cart</p>
             </div>
           ) : (
-            <ScrollArea className="h-full pr-4 mt-4 -mr-4">
-              <div className="pr-4 space-y-6">
+            <ScrollArea className="h-full pr-4 mt-2 -mr-4">
+              <div className="pr-4 space-y-3">
                 {cart.map((item) => (
-                  <div key={item.id} className="group flex items-center gap-3">
-                    {/* ✅ Individual Checkbox */}
+                  /* ✅ Item එකේ උස අඩු කරලා (h-20) දිග වැඩි කළා */
+                  <div key={item.id} className="group flex items-center gap-3 bg-muted/20 p-2 rounded-xl border border-transparent hover:border-primary/10 transition-all">
                     <Checkbox 
                       checked={item.selected}
                       onCheckedChange={() => toggleSelectItem(item.id)}
+                      className="h-3.5 w-3.5"
                     />
 
-                    <div className="flex flex-1 gap-4">
-                      <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
+                    <div className="flex flex-1 gap-3 items-center">
+                      {/* ✅ Image එක පොඩි කළා */}
+                      <div className="h-16 w-12 flex-shrink-0 overflow-hidden rounded-lg border bg-background shadow-sm">
                         <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
                       </div>
 
-                      <div className="flex flex-1 flex-col justify-between">
-                        <div>
-                          <h4 className="font-bold line-clamp-1 text-sm uppercase">{item.title}</h4>
-                          <p className="text-xs text-muted-foreground italic">by {item.author}</p>
-                        </div>
-                        
-                        <div className="flex items-end justify-between">
-                          <p className="font-black text-lg text-primary">
+                      <div className="flex flex-1 items-center justify-between">
+                        {/* Title & Author */}
+                        <div className="space-y-0.5 max-w-[150px]">
+                          <h4 className="font-bold line-clamp-1 text-[11px] uppercase tracking-tighter leading-none">{item.title}</h4>
+                          <p className="text-[9px] text-muted-foreground italic truncate">by {item.author}</p>
+                          <p className="font-black text-xs text-primary mt-1">
                             LKR {item.price.toLocaleString()}
                           </p>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center border rounded-lg bg-muted/30 h-8">
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeFromCart(item.id)}>
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                              <span className="text-xs font-bold w-6 text-center">{item.quantity}</span>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => addToCart(item)}>
-                                <Plus className="h-3 w-3" />
-                              </Button>
-                            </div>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removeItemCompletely(item.id)}>
-                              <Trash2 className="h-4 w-4" />
+                        </div>
+                        
+                        {/* ✅ Quantity Controls - Compact කළා */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center border rounded-lg bg-background h-7">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeFromCart(item.id)}>
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="text-[10px] font-bold w-5 text-center">{item.quantity}</span>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => addToCart(item)}>
+                              <Plus className="h-3 w-3" />
                             </Button>
                           </div>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => removeItemCompletely(item.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -122,27 +120,29 @@ export function CartDrawer() {
           )}
         </div>
 
+        {/* Footer section - ✅ Fonts & Button සයිස් අඩු කළා */}
         {cart.length > 0 && (
-          <SheetFooter className="mt-auto pt-4 sm:pt-6 border-t bg-background">
-            <div className="w-full space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground font-medium">Selected ({selectedCount})</span>
-                <span className="text-2xl font-black tracking-tight text-primary">
+          <div className="mt-auto pt-4 border-t bg-background">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Selected ({selectedCount})</span>
+              <div className="text-right">
+                <span className="block text-[9px] font-bold text-muted-foreground uppercase">Subtotal</span>
+                <span className="text-xl font-black tracking-tighter text-primary italic leading-none">
                   LKR {totalPrice().toLocaleString()}
                 </span>
               </div>
-              <SheetClose asChild>
-                <Button 
-                  className="w-full h-14 text-md font-black uppercase tracking-widest"
-                  onClick={() => navigate("/checkout")}
-                  disabled={selectedCount === 0} // 👈 එකක්වත් තෝරලා නැත්නම් checkout යන්න බෑ
-                >
-                  Checkout Selected ({selectedCount})
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </SheetClose>
             </div>
-          </SheetFooter>
+            <SheetClose asChild>
+              <Button 
+                className="w-full h-11 text-xs font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-primary/20"
+                onClick={() => navigate("/checkout")}
+                disabled={selectedCount === 0}
+              >
+                Checkout Now
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </SheetClose>
+          </div>
         )}
       </SheetContent>
     </Sheet>
