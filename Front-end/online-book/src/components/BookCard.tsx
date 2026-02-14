@@ -17,8 +17,8 @@ interface BookCardProps {
   soldCount: number;
 }
 
-const BookCard = ({ 
-  id, title, author, price, originalPrice, category, image, rating, soldCount 
+const BookCard = ({
+  id, title, author, price, originalPrice, category, image, rating, soldCount
 }: BookCardProps) => {
   const { addToCart } = useCartStore();
   const navigate = useNavigate();
@@ -26,16 +26,16 @@ const BookCard = ({
   const savings = originalPrice - price;
 
   return (
-    <Card className="group relative overflow-hidden border-none shadow-none hover:shadow-xl transition-all duration-300 bg-card rounded-xl flex flex-col h-full font-sans">
-      
+    <Card className="group/card relative overflow-hidden border-none shadow-none hover:shadow-xl transition-all duration-300 bg-card rounded-xl flex flex-col h-full font-sans">
+
       {/* 1. Image Section */}
       <Link to={`/book/${id}`} className="block relative aspect-square overflow-hidden bg-muted">
         <img
           src={image}
           alt={title}
-          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+          className="object-cover w-full h-full transition-transform duration-500 group-hover/card:scale-110"
         />
-        
+
         {/* Category Badge */}
         <div className="absolute top-2 left-2">
           <Badge className="bg-primary text-primary-foreground border-none font-bold text-[10px] px-2 h-5 shadow-sm uppercase tracking-wider">
@@ -43,14 +43,14 @@ const BookCard = ({
           </Badge>
         </div>
       </Link>
-      
+
       {/* 2. Content Section */}
       <CardContent className="p-3 flex-grow flex flex-col pb-4">
         {/* Book Title & Author */}
         <div className="mb-2">
           <Link to={`/book/${id}`}>
             {/* ✅ Title: font-black ඉවත් කර font-medium යෙදුවා */}
-            <h3 className="font-medium text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors tracking-tight text-foreground">
+            <h3 className="font-medium text-lg leading-tight line-clamp-1 group-hover/card:text-primary transition-colors tracking-tight text-foreground">
               {title}
             </h3>
           </Link>
@@ -65,7 +65,7 @@ const BookCard = ({
             <span className="text-[12px] font-bold ml-0.5">{Number(rating).toFixed(1)}</span>
           </div>
           <span className="text-[12px] text-muted-foreground font-medium">
-            | {soldCount > 1000 ? `${(soldCount/1000).toFixed(1)}k+` : soldCount}+ sold
+            | {soldCount > 1000 ? `${(soldCount / 1000).toFixed(1)}k+` : soldCount}+ sold
           </span>
         </div>
 
@@ -90,21 +90,21 @@ const BookCard = ({
       </CardContent>
 
       {/* 3. Action Buttons (Hover Effect) */}
-      <CardFooter className="p-3 absolute bottom-0 w-full bg-card/95 backdrop-blur-sm border-t opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-in-out flex flex-col gap-2 z-10">
-        <Button 
+      <CardFooter className="p-3 absolute bottom-0 w-full bg-card/95 backdrop-blur-sm border-t opacity-0 translate-y-full group-hover/card:opacity-100 group-hover/card:translate-y-0 transition-all duration-300 ease-in-out flex flex-col gap-2 z-10">
+        <Button
           onClick={() => addToCart({ id, title, author, price, image })}
           className="w-full font-bold h-10 gap-2 bg-primary hover:bg-primary/90 rounded-full text-xs shadow-md active:scale-95 transition-all uppercase tracking-wider"
         >
-          <ShoppingCart className="h-4 w-4" /> 
+          <ShoppingCart className="h-4 w-4" />
           Add to Cart
         </Button>
 
-        <Button 
+        <Button
           variant="outline"
           onClick={() => navigate(`/category/${category.toLowerCase()}`)}
           className="w-full font-bold h-10 gap-2 border-primary/40 text-primary hover:bg-primary/5 rounded-full text-xs active:scale-95 transition-all uppercase tracking-wider"
         >
-          <Search className="h-4 w-4" /> 
+          <Search className="h-4 w-4" />
           Similar Books
         </Button>
       </CardFooter>
