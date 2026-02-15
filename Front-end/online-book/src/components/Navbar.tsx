@@ -106,6 +106,33 @@ const Navbar = ({ setSearchQuery }: NavbarProps) => {
               Category
             </Button>
           </Link>
+
+          <Link to="/reviews">
+            <Button
+              variant="ghost"
+              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+            >
+              Reviews
+            </Button>
+          </Link>
+
+          <Link to="/articles">
+            <Button
+              variant="ghost"
+              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+            >
+              Articles
+            </Button>
+          </Link>
+
+          <Link to="/contact">
+            <Button
+              variant="ghost"
+              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+            >
+              Contact
+            </Button>
+          </Link>
         </div>
 
         {/* Search Bar */}
