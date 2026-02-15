@@ -29,7 +29,7 @@ const BookCard = ({
     <Card className="group/card relative overflow-hidden border-none shadow-none hover:shadow-xl transition-all duration-300 bg-card rounded-xl flex flex-col h-full font-sans">
 
       {/* 1. Image Section */}
-      <Link to={`/book/${id}`} className="block relative aspect-square overflow-hidden bg-muted">
+      <Link to={`/book/${id}`} className="block relative aspect-[2/3] overflow-hidden bg-muted">
         <img
           src={image}
           alt={title}
