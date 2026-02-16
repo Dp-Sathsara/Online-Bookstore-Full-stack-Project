@@ -8,7 +8,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
   SheetClose,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 export function CartDrawer() {
   const navigate = useNavigate();
   const { cart, addToCart, removeFromCart, removeItemCompletely, totalPrice, toggleSelectItem, toggleSelectAll } = useCartStore();
-  
+
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const selectedCount = cart.filter(item => item.selected).length;
   const isAllSelected = cart.length > 0 && selectedCount === cart.length;
@@ -36,7 +35,7 @@ export function CartDrawer() {
           )}
         </Button>
       </SheetTrigger>
-      
+
       {/* Drawer එකේ width එක වැඩි කළා (sm:max-w-lg) */}
       <SheetContent className="w-full sm:max-w-lg flex flex-col h-full bg-background font-sans">
         <SheetHeader className="pb-2">
@@ -44,11 +43,11 @@ export function CartDrawer() {
             <ShoppingCart className="h-5 w-5 text-primary" />
             Cart
           </SheetTitle>
-          
+
           {cart.length > 0 && (
             <div className="flex items-center gap-2 py-1">
-              <Checkbox 
-                id="selectAll" 
+              <Checkbox
+                id="selectAll"
                 checked={isAllSelected}
                 onCheckedChange={(checked) => toggleSelectAll(!!checked)}
                 className="h-3 w-3"
@@ -59,7 +58,7 @@ export function CartDrawer() {
             </div>
           )}
         </SheetHeader>
-        
+
         <Separator />
 
         <div className="flex-1 overflow-hidden relative">
@@ -74,7 +73,7 @@ export function CartDrawer() {
                 {cart.map((item) => (
                   /* ✅ Item එකේ උස අඩු කරලා (h-20) දිග වැඩි කළා */
                   <div key={item.id} className="group flex items-center gap-3 bg-muted/20 p-2 rounded-xl border border-transparent hover:border-primary/10 transition-all">
-                    <Checkbox 
+                    <Checkbox
                       checked={item.selected}
                       onCheckedChange={() => toggleSelectItem(item.id)}
                       className="h-3.5 w-3.5"
@@ -95,7 +94,7 @@ export function CartDrawer() {
                             LKR {item.price.toLocaleString()}
                           </p>
                         </div>
-                        
+
                         {/* ✅ Quantity Controls - Compact කළා */}
                         <div className="flex items-center gap-3">
                           <div className="flex items-center border rounded-lg bg-background h-7">
@@ -133,7 +132,7 @@ export function CartDrawer() {
               </div>
             </div>
             <SheetClose asChild>
-              <Button 
+              <Button
                 className="w-full h-11 text-xs font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-primary/20"
                 onClick={() => navigate("/checkout")}
                 disabled={selectedCount === 0}

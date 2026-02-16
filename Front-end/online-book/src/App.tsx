@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import CheckoutPage from "./components/CheckoutPage";
 
 // ✅ User Pages & Components
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import { LoginForm } from "./components/LoginForm";
 import { RegisterForm } from "./components/RegisterForm";
@@ -29,12 +32,15 @@ import AdminUsers from "./components/admin/AdminUsers";
 import AdminReviews from "./components/admin/AdminReviews";
 import AdminArticles from "./components/admin/AdminArticles";
 import AdminContactMessages from "./components/admin/AdminContactMessages";
-import AdminAnnotuncements from "./components/admin/AdminMessages"; // Placeholder until created
-import AdminFAQ from "./components/admin/AdminFAQ"; // Placeholder until created
-import FAQPage from "./pages/FAQPage"; // Placeholder until created
-import MessagesPage from "./pages/MessagesPage"; // Placeholder until created
+import AdminMessages from "@/components/admin/AdminMessages"; // Updated import name and path
+import AdminOrders from "@/components/admin/AdminOrders"; // ✅ Import AdminOrders
+import AdminFAQ from "@/components/admin/AdminFAQ"; // Placeholder until created
+import FAQPage from "./pages/FAQPage";
+import MessagesPage from "./pages/MessagesPage";
+// import TestPage from "./pages/TestPage";
 
 import ScrollToTop from "./components/ScrollToTop"; // ✅ Import ScrollToTop
+import OrderSuccessPage from "./pages/OrderSuccessPage"; // ✅ Import OrderSuccessPage
 
 const Layout = () => {
   const location = useLocation();
@@ -74,25 +80,24 @@ const Layout = () => {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/book/:id" element={<BookDetails />} />
           <Route path="/category/:category" element={<CategoryPage />} />
+          <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-success" element={<OrderSuccessPage />} /> { /* ✅ Add Order Success Route */}
           <Route path="/profile" element={<ProfileSettings />} />
           <Route path="/orders" element={<MyOrders />} />
           <Route path="/reviews" element={<ReviewsPage />} />
-          <Route path="/articles" element={<ArticlesPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/messages" element={<MessagesPage />} />
 
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-          <Route path="/admin/inventory" element={<AdminLayout><AdminInventory /></AdminLayout>} />
-          <Route path="/admin/messages" element={<AdminLayout><AdminAnnotuncements /></AdminLayout>} />
-          <Route path="/admin/faq" element={<AdminLayout><AdminFAQ /></AdminLayout>} />
-          <Route path="/admin/analytics" element={<AdminLayout><AdminAnalytics /></AdminLayout>} />
-          <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
-          <Route path="/admin/reviews" element={<AdminLayout><AdminReviews /></AdminLayout>} />
-          <Route path="/admin/articles" element={<AdminLayout><AdminArticles /></AdminLayout>} />
-          <Route path="/admin/contacts" element={<AdminLayout><AdminContactMessages /></AdminLayout>} />
+          <Route path="/admin" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/inventory" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminInventory /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/orders" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminOrders /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/messages" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminMessages /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/faq" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminFAQ /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminAnalytics /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/reviews" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminReviews /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/articles" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminArticles /></AdminLayout></ProtectedRoute>} />
+          <Route path="/admin/contacts" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminContactMessages /></AdminLayout></ProtectedRoute>} />
 
           {/* Auth Routes */}
           <Route path="/login" element={<div className="flex items-center justify-center min-h-[80vh] px-4"><LoginForm /></div>} />
@@ -103,6 +108,7 @@ const Layout = () => {
 
       {/* Footer එක පෙන්වීම (Navbar පේන පේජ් වලට පමණක්) */}
       {shouldShowHeaderFooter && <Footer />}
+      <Toaster />
     </div>
   );
 };
@@ -111,7 +117,9 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
-        <Layout />
+        <AuthProvider>
+          <Layout />
+        </AuthProvider>
       </Router>
     </ThemeProvider>
   );

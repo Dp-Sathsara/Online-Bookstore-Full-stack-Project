@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { useContentStore } from "@/store/useContentStore";
+import { ContactService } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
-import type { ContactMessage } from "@/types/content";
 
 const ContactPage = () => {
-    const { addContactMessage } = useContentStore();
+    // const { addContactMessage } = useContentStore(); // Deprecated
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -16,17 +15,17 @@ const ContactPage = () => {
         message: ""
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const newMessage: ContactMessage = {
-            id: Date.now().toString(),
-            date: new Date().toISOString().split('T')[0],
-            ...formData
-        };
 
-        addContactMessage(newMessage);
-        toast.success("Message sent successfully!");
-        setFormData({ name: "", email: "", subject: "", message: "" });
+        try {
+            await ContactService.create(formData);
+            toast.success("Message sent successfully!");
+            setFormData({ name: "", email: "", subject: "", message: "" });
+        } catch (error) {
+            console.error("Failed to send message:", error);
+            toast.error("Failed to send message. Please try again.");
+        }
     };
 
     return (

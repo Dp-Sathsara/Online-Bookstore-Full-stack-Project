@@ -26,20 +26,27 @@ import { Label } from "@/components/ui/label";
 const SUGGESTED_CATEGORIES = [
   "Fiction", "Non-Fiction", "Science", "Technology",
   "History", "Biography", "Fantasy", "Mystery",
-  "Romance", "Self-Help", "Productivity", "Children"
+  "Romance", "Self-Help", "Productivity", "Children",
+  "Novels"
 ];
 
 const AdminInventory = () => {
-  const { books, addBook, updateBook, deleteBook } = useBookStore();
+  const { books, addBook, updateBook, deleteBook, fetchBooks } = useBookStore();
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBookId, setEditingBookId] = useState<number | null>(null);
+  const [editingBookId, setEditingBookId] = useState<string | number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
     title: "", author: "", price: "", originalPrice: "",
-    image: "", category: "", stock: "10", discount: "0"
+    image: "", category: "", stock: "10", discount: "0", isFeatured: false, description: ""
   });
 
   // "Smart Category" State
@@ -48,6 +55,7 @@ const AdminInventory = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData({ ...formData, image: reader.result as string });
@@ -64,9 +72,8 @@ const AdminInventory = () => {
 
   const handleOpenModal = (book: any | null = null) => {
     if (book) {
-      setEditingBookId(book.id);
-      // Calculate discount logic if needed, or just allow manual override. 
-      // For now, assuming originalPrice exists.
+      setEditingBookId(book.id || book._id);
+      setSelectedFile(null); // Reset file on edit
       const discount = book.originalPrice && book.price
         ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)
         : 0;
@@ -74,17 +81,20 @@ const AdminInventory = () => {
       setFormData({
         title: book.title, author: book.author,
         price: book.price.toString(),
-        originalPrice: book.originalPrice?.toString() || (book.price * 1.2).toFixed(0), // Fallback logic
+        originalPrice: book.originalPrice?.toString() || (book.price * 1.2).toFixed(0),
         image: book.image,
         category: book.category,
         stock: (book.stock || 20).toString(),
-        discount: discount.toString()
+        discount: discount.toString(),
+        isFeatured: book.isFeatured || false,
+        description: book.description || ""
       });
     } else {
       setEditingBookId(null);
+      setSelectedFile(null);
       setFormData({
         title: "", author: "", price: "", originalPrice: "",
-        image: "", category: "", stock: "10", discount: "0"
+        image: "", category: "", stock: "10", discount: "0", isFeatured: false, description: ""
       });
     }
     setIsModalOpen(true);
@@ -102,33 +112,45 @@ const AdminInventory = () => {
     }
   }, [formData.originalPrice, formData.discount]);
 
-  const handleSave = () => {
-    const bookData = {
+  const handleSave = async () => {
+    // 1. Prepare JSON Data
+    const bookDataObj = {
       title: formData.title,
       author: formData.author,
       price: Number(formData.price),
       originalPrice: Number(formData.originalPrice),
-      image: formData.image || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&q=80",
+      // image: formData.image, // Backend will set this from Cloudinary URL
       category: formData.category || "Uncategorized",
       stock: Number(formData.stock),
-      description: `A great book about ${formData.category}`,
+      description: formData.description,
       rating: 4.5,
       soldCount: 0,
       isChoice: false,
+      isFeatured: formData.isFeatured,
       keywords: [formData.title.toLowerCase(), formData.category.toLowerCase()]
     };
 
     if (editingBookId) {
-      updateBook(editingBookId, bookData);
+      // For update, currently using JSON. If we want image update, we need similar logic.
+      // But prompt asked for Add Book.
+      // We can still pass image URL if not updating file.
+      await updateBook(editingBookId, { ...bookDataObj, image: formData.image });
     } else {
-      addBook(bookData as any);
+      // 2. Prepare FormData for Add Book
+      const data = new FormData();
+      data.append("book", JSON.stringify(bookDataObj));
+      if (selectedFile) {
+        data.append("image", selectedFile);
+      }
+
+      await addBook(data);
     }
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: string | number) => {
     if (confirm("Are you sure you want to delete this book?")) {
-      deleteBook(id);
+      await deleteBook(id);
     }
   };
 
@@ -315,6 +337,16 @@ const AdminInventory = () => {
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Description</Label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full min-h-[80px] rounded-xl bg-muted/50 border-none font-bold p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Enter book description..."
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Selling Price (Auto)</Label>
@@ -324,6 +356,17 @@ const AdminInventory = () => {
                 <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Store / Stock</Label>
                 <Input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} className="h-11 rounded-xl bg-muted/50 border-none font-bold" />
               </div>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-2">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <Label htmlFor="isFeatured" className="text-sm font-bold uppercase tracking-wide cursor-pointer">Add to Featured Books</Label>
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,16 +12,14 @@ import { Loader2, Check, X } from "lucide-react";
 import { SocialLogin } from "./SocialLogin";
 import { PasswordInput } from "@/components/ui/password-input";
 
+// ✅ මෙන්න මේ Import එක වෙනස් කළා (lib/api වෙනුවට services/api)
+import api from "@/services/api";
+
 const registerSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string()
-    .min(8, "Min 8 chars")
-    .regex(/[A-Z]/, "Uppercase letter")
-    .regex(/[a-z]/, "Lowercase letter")
-    .regex(/[0-9]/, "Number")
-    .regex(/[^A-Za-z0-9]/, "Special character"),
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(2, "Last name is required"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(8, "Min 8 chars"),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -30,20 +29,13 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  
-  // ✅ 1. Password Field එක Focus වෙලාද බලන්න state එකක් හැදුවා
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterFormValues>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    mode: "onChange",
   });
 
   const password = watch("password", "");
@@ -58,89 +50,83 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
-    console.log("Register Data:", data);
-    setTimeout(() => {
+    setError(null);
+    try {
+      // ✅ Axios Call (using services/api)
+      const response = await api.post('/auth/register', {
+        username: `${data.firstName} ${data.lastName}`,
+        email: data.email.toLowerCase(),
+        password: data.password,
+        role: 'CUSTOMER'
+      });
+
+      const { token, user } = response.data;
+      login({ ...user, token });
+
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
       setIsLoading(false);
-      navigate("/login"); 
-    }, 2000);
+    }
   };
 
-  // ✅ React Hook Form එකේ Props ටික වෙනම ගත්තා conflict නොවෙන්න
   const { onBlur: onPasswordBlur, ...passwordRegisterProps } = register("password");
 
   return (
     <Card className="w-full max-w-md shadow-2xl border-none font-sans">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-black text-center tracking-tight">Create an account</CardTitle>
-        <CardDescription className="text-center font-medium">
-          Enter your email below to create your account
-        </CardDescription>
+        <CardDescription className="text-center font-medium">Enter your email below to create your account</CardDescription>
       </CardHeader>
       <CardContent>
+        {error && <div className="p-3 mb-4 text-sm text-red-500 bg-red-50 rounded text-center font-bold">{error}</div>}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName" className="font-bold">First name</Label>
-              <Input id="firstName" placeholder="John" {...register("firstName")} />
-              {errors.firstName && <p className="text-red-500 text-xs font-bold">{errors.firstName.message}</p>}
+              <Label>First name</Label>
+              <Input {...register("firstName")} placeholder="John" />
+              {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName" className="font-bold">Last name</Label>
-              <Input id="lastName" placeholder="Doe" {...register("lastName")} />
-              {errors.lastName && <p className="text-red-500 text-xs font-bold">{errors.lastName.message}</p>}
+              <Label>Last name</Label>
+              <Input {...register("lastName")} placeholder="Doe" />
+              {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName.message}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="font-bold">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" {...register("email")} />
-            {errors.email && <p className="text-red-500 text-xs font-bold">{errors.email.message}</p>}
+            <Label>Email</Label>
+            <Input type="email" {...register("email")} placeholder="m@example.com" />
+            {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="font-bold">Password</Label>
-            
-            {/* ✅ 2. Password Input එක Update කළා Focus Events එක්ක */}
-            <PasswordInput 
-              id="password" 
-              {...passwordRegisterProps} // register props ටික pass කළා
-              onFocus={() => setIsPasswordFocused(true)} // Click කළාම List එක පෙන්වන්න
-              onBlur={(e) => {
-                setIsPasswordFocused(false); // Click අයින් කළාම List එක හංගන්න
-                onPasswordBlur(e); // React Hook Form එකේ blur එකත් වැඩ කරන්න ඕනේ
-              }}
+            <Label>Password</Label>
+            <PasswordInput
+              {...passwordRegisterProps}
+              onFocus={() => setIsPasswordFocused(true)}
+              onBlur={(e) => { setIsPasswordFocused(false); onPasswordBlur(e); }}
             />
-            
-            {/* ✅ 3. Conditional Rendering: isPasswordFocused True නම් විතරක් පෙන්වන්න */}
             {isPasswordFocused && (
               <div className="space-y-1.5 pt-1 p-3 bg-muted/50 rounded-lg animate-in fade-in zoom-in-95 duration-200">
                 <p className="text-xs font-bold text-muted-foreground mb-2">Password must contain:</p>
                 {validations.map((rule, index) => (
                   <div key={index} className="flex items-center space-x-2 text-xs">
-                    {rule.valid ? (
-                      <Check className="h-3 w-3 text-green-600 font-bold" />
-                    ) : (
-                      <X className="h-3 w-3 text-red-500" />
-                    )}
-                    <span className={rule.valid ? "text-green-600 font-medium" : "text-muted-foreground"}>
-                      {rule.label}
-                    </span>
+                    {rule.valid ? <Check className="h-3 w-3 text-green-600 font-bold" /> : <X className="h-3 w-3 text-red-500" />}
+                    <span className={rule.valid ? "text-green-600 font-medium" : "text-muted-foreground"}>{rule.label}</span>
                   </div>
                 ))}
               </div>
             )}
-            
-            {/* Error Message */}
-            {errors.password && !isPasswordFocused && (
-               <p className="text-red-500 text-xs font-bold">{errors.password.message}</p>
-            )}
+            {errors.password && !isPasswordFocused && <p className="text-red-500 text-xs">{errors.password.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="font-bold">Confirm Password</Label>
-            <PasswordInput id="confirmPassword" {...register("confirmPassword")} />
-            {errors.confirmPassword && <p className="text-red-500 text-xs font-bold">{errors.confirmPassword.message}</p>}
+            <Label>Confirm Password</Label>
+            <PasswordInput {...register("confirmPassword")} />
+            {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>}
           </div>
 
           <Button type="submit" className="w-full font-black text-md h-11" disabled={isLoading}>
@@ -152,8 +138,7 @@ export function RegisterForm() {
       </CardContent>
       <CardFooter className="flex justify-center pb-6">
         <div className="text-sm font-medium text-muted-foreground">
-          Already have an account?{" "}
-          <Link to="/login" className="text-primary font-bold hover:underline">Login</Link>
+          Already have an account? <Link to="/login" className="text-primary font-bold hover:underline">Login</Link>
         </div>
       </CardFooter>
     </Card>
