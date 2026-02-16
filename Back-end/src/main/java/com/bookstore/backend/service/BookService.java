@@ -22,6 +22,12 @@ public class BookService {
         if (book.getPrice() <= 0) {
             throw new IllegalArgumentException("Book price must be greater than zero.");
         }
+        
+        // Automatically set stock status based on quantity if not already set
+        if (book.getStockStatus() == null || book.getStockStatus().trim().isEmpty()) {
+            book.setStockStatus(determineStockStatus(book.getStockQuantity()));
+        }
+        
         return bookRepository.save(book);
     }
 
@@ -49,8 +55,11 @@ public class BookService {
                 existingBook.setAuthor(bookDetails.getAuthor());
             if (bookDetails.getPrice() > 0)
                 existingBook.setPrice(bookDetails.getPrice());
-            if (bookDetails.getStockQuantity() >= 0)
+            if (bookDetails.getStockQuantity() >= 0) {
                 existingBook.setStockQuantity(bookDetails.getStockQuantity());
+                // Recalculate stock status when quantity changes
+                existingBook.setStockStatus(determineStockStatus(bookDetails.getStockQuantity()));
+            }
             if (bookDetails.getDescription() != null)
                 existingBook.setDescription(bookDetails.getDescription());
             if (bookDetails.getGenre() != null)
@@ -126,5 +135,16 @@ public class BookService {
                 .sorted((b1, b2) -> b2.getPublishedDate().compareTo(b1.getPublishedDate()))
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    // Helper method to determine stock status based on quantity
+    private String determineStockStatus(int quantity) {
+        if (quantity <= 0) {
+            return "OUT_OF_STOCK";
+        } else if (quantity <= 5) {
+            return "LOW_STOCK";
+        } else {
+            return "IN_STOCK";
+        }
     }
 }
