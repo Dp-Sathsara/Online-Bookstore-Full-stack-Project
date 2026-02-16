@@ -2,12 +2,19 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { auth, googleProvider, signInWithPopup } from "@/firebase";
 
-export function SocialLogin() {
+interface SocialLoginProps {
+  onSocialAuthSuccess?: (user: any) => void;
+  isLoading?: boolean;
+}
+
+export function SocialLogin({ onSocialAuthSuccess, isLoading: isExternalLoading }: SocialLoginProps) {
   const [country, setCountry] = useState("Detecting...");
   const { login } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [internalLoading, setInternalLoading] = useState(false);
+  const isLoading = isExternalLoading || internalLoading;
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -23,56 +30,93 @@ export function SocialLogin() {
   }, []);
 
   const handleSocialLogin = async (provider: string) => {
-    setIsLoading(true);
+    setInternalLoading(true);
     console.log(`Logging in with ${provider}...`);
 
-    // SIMULATED Social Login Data (Since we don't have real OAuth keys)
-    // In a real app, this data would come from the Google/Facebook SDK
-    const mockSocialUser = {
-      username: `${provider} User`,
-      email: `${provider.toLowerCase()}_user@example.com`,
-      provider: provider.toLowerCase(),
-      imageUrl: `https://ui-avatars.com/api/?name=${provider}+User&background=random`,
-      role: 'CUSTOMER'
-    };
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/social-login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mockSocialUser),
-      });
+      if (provider === "Google") {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
 
-      if (!response.ok) {
-        throw new Error('Social login failed');
+        if (onSocialAuthSuccess) {
+          onSocialAuthSuccess(user);
+        } else {
+          // Fallback if no callback provided (e.g., on Login page)
+          const mockSocialUser = {
+            username: user.displayName || "Google User",
+            email: user.email,
+            provider: "google",
+            imageUrl: user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`,
+            role: 'CUSTOMER'
+          };
+
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/social-login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(mockSocialUser),
+          });
+
+          if (!response.ok) {
+            throw new Error('Social login failed');
+          }
+
+          const data = await response.json();
+          const userWithToken = { ...data.user, token: data.token };
+          login(userWithToken);
+
+          toast({
+            title: "Login Successful",
+            description: `Welcome back, ${userWithToken.username || userWithToken.name}!`,
+          });
+        }
+      } else {
+        // SIMULATED Social Login Data for others
+        const mockSocialUser = {
+          username: `${provider} User`,
+          email: `${provider.toLowerCase()}_user@example.com`,
+          provider: provider.toLowerCase(),
+          imageUrl: `https://ui-avatars.com/api/?name=${provider}+User&background=random`,
+          role: 'CUSTOMER'
+        };
+
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/social-login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(mockSocialUser),
+        });
+
+        if (!response.ok) {
+          throw new Error('Social login failed');
+        }
+
+        const data = await response.json();
+        const userWithToken = { ...data.user, token: data.token };
+        login(userWithToken);
+
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${userWithToken.username || userWithToken.name}!`,
+        });
       }
 
-      const data = await response.json();
-      const userWithToken = { ...data.user, token: data.token };
-      login(userWithToken);
-
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${userWithToken.username || userWithToken.name}!`,
-      });
-
-    } catch (error) {
+    } catch (error: any) {
       console.error("Social login error:", error);
       toast({
         title: "Login Failed",
-        description: "Could not authenticate with social provider.",
+        description: error.message || "Could not authenticate with social provider.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setInternalLoading(false);
     }
   };
 
   return (
     <div className="w-full flex flex-col items-center gap-4 mt-6">
-
       {/* Divider */}
       <div className="relative w-full">
         <div className="absolute inset-0 flex items-center">
@@ -85,7 +129,6 @@ export function SocialLogin() {
 
       {/* Social Buttons Row */}
       <div className="flex justify-center gap-4 w-full mt-2">
-
         {/* Google */}
         <Button
           type="button"
@@ -152,7 +195,6 @@ export function SocialLogin() {
           By continuing, you confirm that you are an adult and have read and accepted our Privacy Policy.
         </p>
       </div>
-
     </div>
   );
 }
