@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Hero from "@/components/Hero";
 import BookRow from "@/components/BookRow";
 import BookCard from "@/components/BookCard";
@@ -9,18 +9,22 @@ import { ArrowRight } from "lucide-react";
 // ✅ Swiper Imports
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
+import 'swiper/swiper-bundle.css';
+import BookGrid from "@/components/BookGrid";
+
+
 
 import { useBookStore } from "@/store/useBookStore";
 
 const Home = () => {
-  const navigate = useNavigate();
-  const { books } = useBookStore();
+  const { books, fetchBooks } = useBookStore();
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
 
   // Filtering Logic for different sections
-  const featuredBooks = books.slice(0, 10); // Display 10 books in the carousel
+  const featuredBooks = books.filter(b => b.isFeatured).slice(0, 10); // Display featured books
   const newArrivals = [...books].reverse().slice(0, 12);
   const fictionBooks = books.filter(b => b.category === "Fiction").slice(0, 12);
   const childrenBooks = books.filter(b => b.category === "Children").slice(0, 12);
@@ -103,20 +107,18 @@ const Home = () => {
             autoScrollDirection="right"
           />
 
-          {/* 3. Children - Moves LEFT */}
-          <BookRow
+          {/* 3. Children - Grid Layout */}
+          <BookGrid
             title="Best Children's Books"
             books={childrenBooks}
             categoryLink="/categories?category=Children"
-            autoScrollDirection="left"
           />
 
-          {/* 4. Novels - Moves RIGHT */}
-          <BookRow
+          {/* 4. Novels - Grid Layout */}
+          <BookGrid
             title="Best Novels"
             books={novelsBooks}
             categoryLink="/categories?category=Novels"
-            autoScrollDirection="right"
           />
         </div>
 

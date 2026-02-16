@@ -14,6 +14,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const menuItems = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/admin" },
     { label: "Inventory", icon: Package, path: "/admin/inventory" },
+    { label: "Orders", icon: Package, path: "/admin/orders" },
     { label: "Analytics", icon: BarChart3, path: "/admin/analytics" },
     { label: "Customers", icon: Users, path: "/admin/users" },
     { label: "Reviews", icon: Star, path: "/admin/reviews" },

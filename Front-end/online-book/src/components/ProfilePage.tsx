@@ -6,9 +6,9 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  User, Package, Calendar, Clock, MapPin, 
-  Settings, Camera, Star, CheckCircle2, MessageSquare
+import {
+  User, Package, Clock, MapPin,
+  Settings, Camera, Star, MessageSquare
 } from "lucide-react";
 import {
   Dialog,
@@ -26,7 +26,7 @@ const ProfilePage = () => {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   // Profile data state
-  const [userData, setUserData] = useState({
+  const [userData, _setUserData] = useState({
     name: "User Name",
     email: "user@example.com",
     address: "Colombo, Sri Lanka",
@@ -38,24 +38,24 @@ const ProfilePage = () => {
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-4xl font-black uppercase tracking-tighter italic">My Account</h1>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
+
         {/* ✅ User Info Section with Edit Capability */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="border-none shadow-xl rounded-[2rem] overflow-hidden group">
             <div className="bg-primary h-28 w-full relative overflow-hidden">
-               <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
             </div>
             <CardContent className="relative pt-16 text-center">
-              
+
               {/* Profile Image Click to Edit */}
               <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
                 <DialogTrigger asChild>
                   <div className="absolute -top-14 left-1/2 -translate-x-1/2 h-28 w-28 rounded-full border-[6px] border-background bg-muted flex items-center justify-center overflow-hidden shadow-2xl cursor-pointer hover:scale-105 transition-transform group">
                     <User className="h-14 w-14 text-muted-foreground group-hover:text-primary transition-colors" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                       <Camera className="h-6 w-6 text-white" />
+                      <Camera className="h-6 w-6 text-white" />
                     </div>
                   </div>
                 </DialogTrigger>
@@ -88,9 +88,9 @@ const ProfilePage = () => {
 
               <h3 className="text-2xl font-black uppercase italic tracking-tight">{userData.name}</h3>
               <p className="text-sm text-muted-foreground font-medium mb-6">{userData.email}</p>
-              
+
               <Separator className="mb-6 opacity-50" />
-              
+
               <div className="space-y-4 text-left px-2">
                 <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                   <div className="bg-primary/10 p-2 rounded-lg"><MapPin className="h-4 w-4 text-primary" /></div>
@@ -127,20 +127,20 @@ const ProfilePage = () => {
               ) : (
                 orders.map((order) => (
                   <div key={order.orderId} className="border-2 border-muted/30 rounded-[2rem] p-8 hover:border-primary/20 transition-all group overflow-hidden relative">
-                    
+
                     <div className="flex flex-wrap justify-between items-start gap-6 mb-8 relative z-10">
                       <div className="space-y-1">
                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Order ID</p>
                         <p className="text-xl font-black text-primary italic tracking-tight uppercase leading-none">{order.orderId}</p>
                       </div>
                       <div className="flex gap-8 items-center">
-                         <div className="text-right">
-                           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Purchase Date</p>
-                           <p className="font-black text-sm text-foreground italic">{order.date}</p>
-                         </div>
-                         <Badge className={`${order.status === 'Delivered' ? 'bg-blue-500' : 'bg-green-500'} text-white border-none font-black uppercase text-[9px] tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/10 animate-pulse`}>
-                           {order.status}
-                         </Badge>
+                        <div className="text-right">
+                          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Purchase Date</p>
+                          <p className="font-black text-sm text-foreground italic">{order.date}</p>
+                        </div>
+                        <Badge className={`${order.status === 'Delivered' ? 'bg-blue-500' : 'bg-green-500'} text-white border-none font-black uppercase text-[9px] tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/10 animate-pulse`}>
+                          {order.status}
+                        </Badge>
                       </div>
                     </div>
 
@@ -157,13 +157,13 @@ const ProfilePage = () => {
                     </div>
 
                     <Separator className="mb-6 opacity-30" />
-                    
+
                     <div className="flex justify-between items-end relative z-10">
                       <div className="space-y-1">
-                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Investment</p>
-                         <p className="text-3xl font-black text-foreground italic tracking-tighter leading-none uppercase">LKR {order.totalAmount.toLocaleString()}</p>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Investment</p>
+                        <p className="text-3xl font-black text-foreground italic tracking-tighter leading-none uppercase">LKR {order.totalAmount.toLocaleString()}</p>
                       </div>
-                      
+
                       {/* ✅ Feedback Action - Based on Status */}
                       {order.status === 'Delivered' ? (
                         <Dialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen}>
@@ -173,22 +173,22 @@ const ProfilePage = () => {
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-md rounded-[2.5rem] font-sans text-center p-10">
-                             <DialogHeader className="items-center">
-                                <div className="bg-blue-100 p-4 rounded-full mb-4"><Star className="h-10 w-10 text-blue-600 fill-blue-600" /></div>
-                                <DialogTitle className="text-3xl font-black uppercase italic tracking-tighter">Share Your Thoughts!</DialogTitle>
-                                <DialogDescription className="text-md font-medium">How was your experience with these books?</DialogDescription>
-                             </DialogHeader>
-                             <div className="flex justify-center gap-2 py-6">
-                                {[...Array(5)].map((_, i) => <Star key={i} className="h-8 w-8 text-yellow-400 cursor-pointer hover:scale-110 transition-transform" />)}
-                             </div>
-                             <textarea className="w-full bg-muted/50 rounded-[1.5rem] p-4 text-sm font-medium border-none focus:ring-2 ring-primary h-32" placeholder="Write your review here..."></textarea>
-                             <Button className="w-full mt-6 h-14 rounded-2xl font-black uppercase tracking-widest bg-blue-600" onClick={() => setIsFeedbackOpen(false)}>Submit Feedback</Button>
+                            <DialogHeader className="items-center">
+                              <div className="bg-blue-100 p-4 rounded-full mb-4"><Star className="h-10 w-10 text-blue-600 fill-blue-600" /></div>
+                              <DialogTitle className="text-3xl font-black uppercase italic tracking-tighter">Share Your Thoughts!</DialogTitle>
+                              <DialogDescription className="text-md font-medium">How was your experience with these books?</DialogDescription>
+                            </DialogHeader>
+                            <div className="flex justify-center gap-2 py-6">
+                              {[...Array(5)].map((_, i) => <Star key={i} className="h-8 w-8 text-yellow-400 cursor-pointer hover:scale-110 transition-transform" />)}
+                            </div>
+                            <textarea className="w-full bg-muted/50 rounded-[1.5rem] p-4 text-sm font-medium border-none focus:ring-2 ring-primary h-32" placeholder="Write your review here..."></textarea>
+                            <Button className="w-full mt-6 h-14 rounded-2xl font-black uppercase tracking-widest bg-blue-600" onClick={() => setIsFeedbackOpen(false)}>Submit Feedback</Button>
                           </DialogContent>
                         </Dialog>
                       ) : (
                         <div className="flex items-center gap-3 bg-muted/50 px-6 py-3 rounded-2xl border border-dashed border-muted">
-                           <Clock className="h-4 w-4 text-muted-foreground animate-spin-slow" />
-                           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">Awaiting Delivery...</span>
+                          <Clock className="h-4 w-4 text-muted-foreground animate-spin-slow" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">Awaiting Delivery...</span>
                         </div>
                       )}
                     </div>

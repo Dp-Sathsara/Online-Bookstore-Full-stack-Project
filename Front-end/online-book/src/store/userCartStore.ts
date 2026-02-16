@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface Book {
-  id: number;
+  id: number | string;
   title: string;
   author: string;
   price: number;
@@ -26,9 +26,9 @@ interface CartStore {
   cart: CartItem[];
   orders: Order[];
   addToCart: (book: Book, qty?: number) => void;
-  removeFromCart: (id: number) => void;
-  removeItemCompletely: (id: number) => void;
-  toggleSelectItem: (id: number) => void;
+  removeFromCart: (id: number | string) => void;
+  removeItemCompletely: (id: number | string) => void;
+  toggleSelectItem: (id: number | string) => void;
   toggleSelectAll: (isSelected: boolean) => void;
   clearSelectedItems: () => void;
   clearCart: () => void;

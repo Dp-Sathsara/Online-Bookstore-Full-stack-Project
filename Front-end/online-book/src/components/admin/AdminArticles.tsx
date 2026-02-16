@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useContentStore } from "@/store/useContentStore";
+import { useState, useEffect } from "react";
+import { ArticleService, type Article } from "@/services/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,20 +7,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trash2, Edit, Plus, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import type { Article } from "@/types/content";
 
 const AdminArticles = () => {
-    const { articles, addArticle, updateArticle, deleteArticle } = useContentStore();
+    const [articles, setArticles] = useState<Article[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         title: "",
         content: "",
-        image: "",
+        imageUrl: "",
         author: "Admin", // Default author
-        status: "published" as "published" | "draft"
+        // status: "published" as "published" | "draft" // Status not in Article interface yet, removing for now or handling if backend adds it
     });
+
+    useEffect(() => {
+        fetchArticles();
+    }, []);
+
+    const fetchArticles = async () => {
+        try {
+            setLoading(true);
+            const data = await ArticleService.getAll();
+            setArticles(data);
+        } catch (error) {
+            console.error("Failed to fetch articles:", error);
+            toast.error("Failed to fetch articles");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleOpenDialog = (article?: Article) => {
         if (article) {
@@ -28,39 +45,45 @@ const AdminArticles = () => {
             setFormData({
                 title: article.title,
                 content: article.content,
-                image: article.image,
+                imageUrl: article.imageUrl || "",
                 author: article.author,
-                status: article.status
             });
         } else {
             setEditingArticle(null);
-            setFormData({ title: "", content: "", image: "", author: "Admin", status: "published" });
+            setFormData({ title: "", content: "", imageUrl: "", author: "Admin" });
         }
         setIsDialogOpen(true);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const newArticle: Article = {
-            id: editingArticle ? editingArticle.id : Date.now().toString(),
-            date: editingArticle ? editingArticle.date : new Date().toISOString().split('T')[0],
-            ...formData
-        };
 
-        if (editingArticle) {
-            updateArticle(newArticle);
-            toast.success("Article updated");
-        } else {
-            addArticle(newArticle);
-            toast.success("Article created");
+        try {
+            if (editingArticle) {
+                await ArticleService.update(editingArticle.id, formData);
+                toast.success("Article updated");
+            } else {
+                await ArticleService.create(formData);
+                toast.success("Article created");
+            }
+            setIsDialogOpen(false);
+            fetchArticles();
+        } catch (error) {
+            console.error("Failed to save article:", error);
+            toast.error("Failed to save article");
         }
-        setIsDialogOpen(false);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm("Delete this article?")) {
-            deleteArticle(id);
-            toast.success("Article deleted");
+            try {
+                await ArticleService.delete(id);
+                toast.success("Article deleted");
+                fetchArticles();
+            } catch (error) {
+                console.error("Failed to delete article:", error);
+                toast.error("Failed to delete article");
+            }
         }
     };
 
@@ -81,17 +104,20 @@ const AdminArticles = () => {
                             <TableHead>Title</TableHead>
                             <TableHead>Author</TableHead>
                             <TableHead>Date</TableHead>
-                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {articles.map((article) => (
+                        {loading && articles.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell>
+                            </TableRow>
+                        ) : articles.map((article) => (
                             <TableRow key={article.id}>
                                 <TableCell>
                                     <div className="h-10 w-16 bg-muted rounded overflow-hidden">
-                                        {article.image ? (
-                                            <img src={article.image} alt={article.title} className="h-full w-full object-cover" />
+                                        {article.imageUrl ? (
+                                            <img src={article.imageUrl} alt={article.title} className="h-full w-full object-cover" />
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center text-muted-foreground"><ImageIcon className="h-4 w-4" /></div>
                                         )}
@@ -99,13 +125,7 @@ const AdminArticles = () => {
                                 </TableCell>
                                 <TableCell className="font-medium">{article.title}</TableCell>
                                 <TableCell>{article.author}</TableCell>
-                                <TableCell>{article.date}</TableCell>
-                                <TableCell>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${article.status === 'published' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                                        }`}>
-                                        {article.status}
-                                    </span>
-                                </TableCell>
+                                <TableCell>{article.publishedDate || article.createdAt || 'N/A'}</TableCell>
                                 <TableCell className="text-right space-x-2">
                                     <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => handleOpenDialog(article)}>
                                         <Edit className="h-4 w-4" />
@@ -116,9 +136,9 @@ const AdminArticles = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {articles.length === 0 && (
+                        {!loading && articles.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                                     No articles found.
                                 </TableCell>
                             </TableRow>
@@ -156,8 +176,8 @@ const AdminArticles = () => {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Image URL</label>
                                 <Input
-                                    value={formData.image}
-                                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                                    value={formData.imageUrl}
+                                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                                     placeholder="https://..."
                                 />
                             </div>

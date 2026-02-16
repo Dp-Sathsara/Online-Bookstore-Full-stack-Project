@@ -1,92 +1,90 @@
-import { useContentStore } from "@/store/useContentStore";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useEffect, useState } from "react";
+import { ReviewService, type Review } from "@/services/api";
 import { Button } from "@/components/ui/button";
-import { Trash2, CheckCircle, XCircle } from "lucide-react";
-import { toast } from "sonner"; // Assuming sonner is used for notifications
+import { Trash2 } from "lucide-react";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
-const AdminReviews = () => {
-    const { reviews, updateReviewStatus, deleteReview } = useContentStore();
+export default function AdminReviews() {
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this review?")) {
-            deleteReview(id);
-            toast.success("Review deleted");
+    useEffect(() => {
+        fetchReviews();
+    }, []);
+
+    const fetchReviews = async () => {
+        try {
+            const data = await ReviewService.getAll();
+            setReviews(data);
+        } catch (error) {
+            console.error("Failed to fetch reviews", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleStatusUpdate = (id: string, status: 'approved' | 'rejected') => {
-        updateReviewStatus(id, status);
-        toast.success(`Review ${status}`);
+    const handleDelete = async (id: string) => {
+        if (!window.confirm("Are you sure you want to delete this review?")) return;
+        try {
+            await ReviewService.delete(id);
+            setReviews(reviews.filter((r) => r.id !== id));
+        } catch (error) {
+            console.error("Failed to delete review", error);
+            alert("Failed to delete review");
+        }
     };
 
-    return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-black tracking-tight">Reviews</h1>
-            </div>
+    if (loading) return <div>Loading...</div>;
 
-            <div className="bg-card rounded-xl border shadow-sm">
+    return (
+        <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Review Management</h2>
+            <div className="rounded-md border">
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Book</TableHead>
                             <TableHead>User</TableHead>
-                            <TableHead>Book ID</TableHead>
                             <TableHead>Rating</TableHead>
                             <TableHead>Comment</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Date</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {reviews.map((review) => (
                             <TableRow key={review.id}>
-                                <TableCell className="font-medium">{review.user}</TableCell>
-                                <TableCell>{review.bookId}</TableCell>
-                                <TableCell>
-                                    <span className="flex items-center gap-1 font-bold text-yellow-500">
-                                        {review.rating} ★
-                                    </span>
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-2">
+                                        {review.bookImage && <img src={review.bookImage} alt="" className="w-8 h-10 object-cover rounded" />}
+                                        <span className="line-clamp-1 max-w-[150px]" title={review.bookTitle}>{review.bookTitle || "Unknown"}</span>
+                                    </div>
                                 </TableCell>
-                                <TableCell className="max-w-md truncate" title={review.comment}>
+                                <TableCell>{review.userName}</TableCell>
+                                <TableCell>
+                                    <span className="text-yellow-500 font-bold">★ {review.rating}</span>
+                                </TableCell>
+                                <TableCell className="max-w-[300px] truncate" title={review.comment}>
                                     {review.comment}
                                 </TableCell>
-                                <TableCell>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${review.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                            review.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                'bg-yellow-100 text-yellow-700'
-                                        }`}>
-                                        {review.status}
-                                    </span>
-                                </TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    {review.status === 'pending' && (
-                                        <>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100" onClick={() => handleStatusUpdate(review.id, 'approved')}>
-                                                <CheckCircle className="h-4 w-4" />
-                                            </Button>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-100" onClick={() => handleStatusUpdate(review.id, 'rejected')}>
-                                                <XCircle className="h-4 w-4" />
-                                            </Button>
-                                        </>
-                                    )}
-                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(review.id)}>
+                                <TableCell>{new Date(review.date).toLocaleDateString()}</TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="destructive" size="sm" onClick={() => handleDelete(review.id)}>
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {reviews.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                    No reviews found.
-                                </TableCell>
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </div>
         </div>
     );
-};
-
-export default AdminReviews;
+}

@@ -1,5 +1,6 @@
 export interface Book {
-  id: number;
+  id: string | number; // ✅ Changed to support MongoDB _id (string)
+  _id?: string; // ✅ MongoDB ID field
   title: string;
   author: string;
   price: number;
@@ -7,11 +8,12 @@ export interface Book {
   category: string;
   image: string;
   description: string;
-  rating: number; // string නොවී number එකක්ම තැබුවා
+  rating: number;
   soldCount: number;
   isChoice: boolean;
+  isFeatured?: boolean;
   keywords: string[];
-  stock?: number; // ✅ Added stock property
+  stock?: number;
 }
 
 export const BOOKS: Book[] = Array.from({ length: 28 }, (_, i) => {
@@ -41,6 +43,7 @@ export const BOOKS: Book[] = Array.from({ length: 28 }, (_, i) => {
     rating: 4.5 + (Math.random() * 0.5), // 4.5 - 5.0 අතර number එකක්
     soldCount: Math.floor(Math.random() * 5000) + 120,
     isChoice: i % 3 === 0,
+    isFeatured: i % 5 === 0, // ✅ Mock featured status
 
     keywords: [title.toLowerCase(), author.toLowerCase(), category.toLowerCase(), "book"],
     stock: Math.floor(Math.random() * 50) + 5 // ✅ Random stock value

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, User, BookOpen, X, Package, Settings, LogOut, LogIn } from "lucide-react";
+import { Search, User, BookOpen, X, Package, Settings, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -19,12 +19,14 @@ import { ModeToggle } from "./mode-toggle";
 import { CartDrawer } from "./CartDrawer";
 
 import { useBookStore } from "@/store/useBookStore";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavbarProps {
   setSearchQuery: (query: string) => void;
 }
 
-const Navbar = ({ setSearchQuery }: NavbarProps) => {
+const Navbar = ({ setSearchQuery: _setSearchQuery }: NavbarProps) => {
+  const { user, logout } = useAuth();
   const { books } = useBookStore();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -185,58 +187,73 @@ const Navbar = ({ setSearchQuery }: NavbarProps) => {
 
           <CartDrawer />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-border/50 ml-1 p-0 overflow-hidden">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-                  <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 font-sans rounded-[1.2rem] shadow-2xl border-none" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal p-4">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-black uppercase italic tracking-tight leading-none">Desitha Sathsara</p>
-                  <p className="text-[10px] font-bold leading-none text-muted-foreground uppercase tracking-widest mt-1">desitha@example.com</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-muted" />
+          {/* Auth Buttons / Profile */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-border/50 ml-1 p-0 overflow-hidden">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={`https://ui-avatars.com/api/?name=${user.username}&background=random`} alt={user.username} />
+                    <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 font-sans rounded-[1.2rem] shadow-2xl border-none" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal p-4">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-black uppercase italic tracking-tight leading-none">{user.username}</p>
+                    <p className="text-[10px] font-bold leading-none text-muted-foreground uppercase tracking-widest mt-1">{user.role}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-muted" />
 
-              {/* ✅ 1. Profile Settings Route */}
-              <DropdownMenuItem
-                className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
-                onClick={() => navigate("/profile")}
-              >
-                <Settings className="mr-3 h-4 w-4" />
-                Profile Settings
-              </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
+                  onClick={() => navigate("/orders")}
+                >
+                  <Package className="mr-3 h-4 w-4" />
+                  My Orders
+                </DropdownMenuItem>
 
-              {/* ✅ 2. My Orders Route */}
-              <DropdownMenuItem
-                className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
-                onClick={() => navigate("/orders")}
-              >
-                <Package className="mr-3 h-4 w-4" />
-                My Orders
-              </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
+                  onClick={() => navigate("/profile")}
+                >
+                  <Settings className="mr-3 h-4 w-4" />
+                  Profile Settings
+                </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="bg-muted" />
+                {user.role === 'ADMIN' && (
+                  <DropdownMenuItem
+                    className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
+                    onClick={() => navigate("/admin")}
+                  >
+                    <Settings className="mr-3 h-4 w-4" />
+                    Admin Dashboard
+                  </DropdownMenuItem>
+                )}
 
-              <DropdownMenuItem
-                className="cursor-pointer font-bold uppercase text-[10px] tracking-widest py-3 focus:bg-primary/10 focus:text-primary"
-                onClick={() => navigate("/login")}
-              >
-                <LogIn className="mr-3 h-4 w-4" />
-                Login
-              </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-muted" />
 
-              <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-black uppercase text-[10px] tracking-widest py-3">
-                <LogOut className="mr-3 h-4 w-4" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuItem
+                  className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-black uppercase text-[10px] tracking-widest py-3"
+                  onClick={logout}
+                >
+                  <LogOut className="mr-3 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link to="/login">
+                <Button variant="ghost" size="sm" className="hidden md:flex font-bold">Sign In</Button>
+              </Link>
+              <Link to="/register">
+                <Button size="sm" className="font-bold">Sign Up</Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </nav>

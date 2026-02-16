@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/userCartStore";
 
 interface BookCardProps {
-  id: number;
+  _id?: string; // ✅ Added _id for MongoDB
+  id: number | string; // Allow string IDs too
   title: string;
   author: string;
   price: number;
@@ -18,10 +19,13 @@ interface BookCardProps {
 }
 
 const BookCard = ({
-  id, title, author, price, originalPrice, category, image, rating, soldCount
+  _id, id, title, author, price, originalPrice, category, image, rating, soldCount
 }: BookCardProps) => {
   const { addToCart } = useCartStore();
   const navigate = useNavigate();
+
+  // ✅ Use _id if available, otherwise fallback to id
+  const bookId = _id || id;
 
   const savings = originalPrice - price;
 
@@ -29,7 +33,7 @@ const BookCard = ({
     <Card className="group/card relative overflow-hidden border-none shadow-none hover:shadow-xl transition-all duration-300 bg-card rounded-xl flex flex-col h-full font-sans">
 
       {/* 1. Image Section */}
-      <Link to={`/book/${id}`} className="block relative aspect-[2/3] overflow-hidden bg-muted">
+      <Link to={`/book/${bookId}`} className="block relative aspect-[2/3] overflow-hidden bg-muted">
         <img
           src={image}
           alt={title}
@@ -48,7 +52,7 @@ const BookCard = ({
       <CardContent className="p-3 flex-grow flex flex-col pb-4">
         {/* Book Title & Author */}
         <div className="mb-2">
-          <Link to={`/book/${id}`}>
+          <Link to={`/book/${bookId}`}>
             {/* ✅ Title: font-black ඉවත් කර font-medium යෙදුවා */}
             <h3 className="font-medium text-lg leading-tight line-clamp-1 group-hover/card:text-primary transition-colors tracking-tight text-foreground">
               {title}

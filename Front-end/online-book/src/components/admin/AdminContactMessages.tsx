@@ -1,16 +1,41 @@
-import { useContentStore } from "@/store/useContentStore";
+import { useState, useEffect } from "react";
+import { ContactService, type Contact } from "@/services/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Trash2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 const AdminContactMessages = () => {
-    const { contacts, deleteContactMessage } = useContentStore();
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const handleDelete = (id: string) => {
+    useEffect(() => {
+        fetchContacts();
+    }, []);
+
+    const fetchContacts = async () => {
+        try {
+            setLoading(true);
+            const data = await ContactService.getAll();
+            setContacts(data);
+        } catch (error) {
+            console.error("Failed to fetch contact messages:", error);
+            toast.error("Failed to fetch contact messages");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
         if (confirm("Delete this message?")) {
-            deleteContactMessage(id);
-            toast.success("Message deleted");
+            try {
+                await ContactService.delete(id);
+                toast.success("Message deleted");
+                fetchContacts();
+            } catch (error) {
+                console.error("Failed to delete message:", error);
+                toast.error("Failed to delete message");
+            }
         }
     };
 
@@ -33,9 +58,13 @@ const AdminContactMessages = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {contacts.map((contact) => (
+                        {loading && contacts.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell>
+                            </TableRow>
+                        ) : contacts.map((contact) => (
                             <TableRow key={contact.id}>
-                                <TableCell className="text-muted-foreground text-sm">{contact.date}</TableCell>
+                                <TableCell className="text-muted-foreground text-sm">{contact.date || 'N/A'}</TableCell>
                                 <TableCell className="font-medium">{contact.name}</TableCell>
                                 <TableCell>
                                     <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-primary hover:underline">
@@ -53,7 +82,7 @@ const AdminContactMessages = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
-                        {contacts.length === 0 && (
+                        {!loading && contacts.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                                     No messages found.
