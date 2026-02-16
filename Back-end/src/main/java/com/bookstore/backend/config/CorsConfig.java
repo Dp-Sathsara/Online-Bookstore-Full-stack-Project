@@ -20,6 +20,8 @@ public class CorsConfig {
 
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://127.0.0.1:3000");
+        configuration.addAllowedOrigin("http://localhost:3001");
+        configuration.addAllowedOrigin("http://127.0.0.1:3001");
 
         // Allow all headers
         configuration.addAllowedHeader("*");

@@ -17,4 +17,8 @@ public class FAQRequest {
     private int sortOrder;
 
     private boolean active;
+
+    public boolean getActive() {
+        return active;
+    }
 }

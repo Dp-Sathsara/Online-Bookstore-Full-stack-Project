@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -146,6 +147,33 @@ public class InventoryController {
         return ResponseEntity.ok().build();
     }
 
+    // Update inventory thresholds
+    @PutMapping("/threshold/{bookId}")
+    public ResponseEntity<InventoryResponse.BookInventoryItem> updateThreshold(
+            @PathVariable String bookId,
+            @RequestBody Map<String, Integer> thresholdRequest) {
+        
+        Book updatedBook = inventoryService.updateThreshold(bookId, 
+            thresholdRequest.get("minThreshold"), thresholdRequest.get("maxThreshold"));
+        return ResponseEntity.ok(convertToInventoryItem(updatedBook));
+    }
+
+    // Create new inventory item
+    @PostMapping
+    public ResponseEntity<InventoryResponse.BookInventoryItem> createInventoryItem(
+            @RequestBody Map<String, Object> inventoryRequest) {
+        
+        Book newBook = inventoryService.createInventoryItem(inventoryRequest);
+        return ResponseEntity.ok(convertToInventoryItem(newBook));
+    }
+
+    // Delete inventory item
+    @DeleteMapping("/{bookId}")
+    public ResponseEntity<Void> deleteInventoryItem(@PathVariable String bookId) {
+        inventoryService.deleteInventoryItem(bookId);
+        return ResponseEntity.ok().build();
+    }
+
     private InventoryResponse.BookInventoryItem convertToInventoryItem(Book book) {
         InventoryResponse.BookInventoryItem item = new InventoryResponse.BookInventoryItem();
         item.setBookId(book.getBook_id());
@@ -154,6 +182,9 @@ public class InventoryController {
         item.setStockQuantity(book.getStockQuantity());
         item.setStockStatus(book.getStockStatus());
         item.setPrice(book.getPrice());
+        item.setMinThreshold(book.getMinThreshold());
+        item.setMaxThreshold(book.getMaxThreshold());
+        item.setCoverImageUrl(book.getCoverImageUrl());
         return item;
     }
 }

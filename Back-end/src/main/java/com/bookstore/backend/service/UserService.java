@@ -152,6 +152,10 @@ public class UserService {
 
             existingUser.setName(userDetails.getName());
 
+            existingUser.setEmail(userDetails.getEmail());
+
+            existingUser.setRole(userDetails.getRole());
+
             existingUser.setAddress(userDetails.getAddress());
 
             existingUser.setPhoneNumber(userDetails.getPhoneNumber());

@@ -16,6 +16,9 @@ public class InventoryResponse {
         private int stockQuantity;
         private String stockStatus;
         private double price;
+        private int minThreshold;
+        private int maxThreshold;
+        private String coverImageUrl;
     }
 
     @Data

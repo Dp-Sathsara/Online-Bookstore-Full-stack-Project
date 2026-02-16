@@ -20,6 +20,8 @@ public class Book {
     private String language;
     private int stockQuantity;
     private String stockStatus; // "IN_STOCK", "OUT_OF_STOCK", "LOW_STOCK"
+    private int minThreshold; // Minimum stock level before alert
+    private int maxThreshold; // Maximum stock level for inventory planning
     private String coverImageUrl;
     private LocalDate publishedDate;
     private Double rating; // Average rating (0.0 to 5.0)

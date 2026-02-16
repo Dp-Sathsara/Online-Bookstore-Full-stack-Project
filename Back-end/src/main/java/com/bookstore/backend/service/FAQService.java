@@ -48,7 +48,7 @@ public class FAQService {
         faq.setAnswer(request.getAnswer());
         faq.setCategory(request.getCategory());
         faq.setSortOrder(request.getSortOrder());
-        faq.setActive(request.isActive());
+        faq.setActive(request.getActive());
 
         return faqRepository.save(faq);
     }
@@ -64,7 +64,7 @@ public class FAQService {
         faq.setAnswer(request.getAnswer());
         faq.setCategory(request.getCategory());
         faq.setSortOrder(request.getSortOrder());
-        faq.setActive(request.isActive());
+        faq.setActive(request.getActive());
         faq.updateTimestamp();
 
         return faqRepository.save(faq);

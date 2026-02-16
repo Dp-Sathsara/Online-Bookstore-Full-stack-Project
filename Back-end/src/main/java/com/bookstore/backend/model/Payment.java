@@ -25,7 +25,7 @@ public class Payment {
 
     public Payment() {
         this.createdAt = LocalDateTime.now();
-        this.currency = "USD";
+        this.currency = "LKR";
         this.status = "PENDING";
         this.paymentMethod = "STRIPE";
     }
