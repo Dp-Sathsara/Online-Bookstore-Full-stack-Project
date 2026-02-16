@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader2, Check, X } from "lucide-react";
-import { SocialLogin } from "./SocialLogin";
 import { PasswordInput } from "@/components/ui/password-input";
-
-// ✅ මෙන්න මේ Import එක වෙනස් කළා (lib/api වෙනුවට services/api)
 import api from "@/services/api";
+
+// ✅ 1. SocialLogin එක Import කරන්න
+import { SocialLogin } from "./SocialLogin";
 
 const registerSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
@@ -30,6 +30,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const { login } = useAuth();
+  const navigate = useNavigate(); // Navigation සඳහා
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,11 +49,11 @@ export function RegisterForm() {
     { label: "At least one special character (!@#$)", valid: /[^A-Za-z0-9]/.test(password) },
   ];
 
+  // ✅ 2. සාමාන්‍ය Email/Password Register Function එක
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     setError(null);
     try {
-      // ✅ Axios Call (using services/api)
       const response = await api.post('/auth/register', {
         username: `${data.firstName} ${data.lastName}`,
         email: data.email.toLowerCase(),
@@ -62,10 +63,44 @@ export function RegisterForm() {
 
       const { token, user } = response.data;
       login({ ...user, token });
+      navigate('/dashboard'); // හෝ අදාළ පිටුවට
 
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ 3. Social Login Success වූ විට ක්‍රියාත්මක වන Function එක
+  const handleSocialAuthSuccess = async (firebaseUser: any) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Backend එකට යවන දත්ත සකස් කරගන්න
+      // Firebase user object එකේ displayName සහ email තිබේ
+      const payload = {
+        email: firebaseUser.email,
+        username: firebaseUser.displayName || "New User",
+        photoUrl: firebaseUser.photoURL,
+        providerId: firebaseUser.providerData[0]?.providerId || 'social', // google.com, etc.
+        uid: firebaseUser.uid // Firebase UID එක ආරක්ෂාවට backend එකට යැවිය හැක
+      };
+
+      // Backend එකට request එක යවන්න (ඔබේ backend එකේ මේ route එක සාදා තිබිය යුතුයි)
+      const response = await api.post('/auth/social-login', payload);
+
+      const { token, user } = response.data;
+
+      // Context එක update කර login කරවන්න
+      login({ ...user, token });
+      navigate('/dashboard');
+
+    } catch (err: any) {
+      console.error("Social Auth Backend Error:", err);
+      setError(err.response?.data?.message || 'Social login failed via backend');
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +118,8 @@ export function RegisterForm() {
         {error && <div className="p-3 mb-4 text-sm text-red-500 bg-red-50 rounded text-center font-bold">{error}</div>}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+          {/* ... Inputs ටික (First Name, Last Name, etc.) කලින් විදියටම ... */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>First name</Label>
@@ -133,7 +170,12 @@ export function RegisterForm() {
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create Account"}
           </Button>
 
-          <SocialLogin />
+          {/* ✅ 4. Social Login Component එක මෙතනට Pass කරන්න */}
+          <SocialLogin
+            onSocialAuthSuccess={handleSocialAuthSuccess}
+            isLoading={isLoading}
+          />
+
         </form>
       </CardContent>
       <CardFooter className="flex justify-center pb-6">
