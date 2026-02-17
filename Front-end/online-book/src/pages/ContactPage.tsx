@@ -41,28 +41,28 @@ const ContactPage = () => {
         {
             icon: MapPin,
             title: "Visit Us",
-            content: "381/1 Nahalla, Rideegama, Kurunegala, Sri Lanka.",
+            content: "Colombo 06, Sri Lanka.",
             color: "text-blue-500",
             bg: "bg-blue-500/10"
         },
         {
             icon: Phone,
             title: "Call Us",
-            content: "+94 75 995 1458",
+            content: "+94 74 243 1458",
             color: "text-green-500",
             bg: "bg-green-500/10"
         },
         {
             icon: Mail,
             title: "Email Us",
-            content: "hello@bookflow.lk",
+            content: "bookaura@outlook.com",
             color: "text-primary",
             bg: "bg-primary/10"
         },
         {
             icon: Clock,
             title: "Working Hours",
-            content: "Mon - Sat: 9 AM - 6 PM",
+            content: "Mon - Sat: 10 AM - 10 PM",
             color: "text-orange-500",
             bg: "bg-orange-500/10"
         }

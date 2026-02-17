@@ -108,6 +108,10 @@ export const AuthService = {
     socialLogin: async (data: any) => {
         const response = await api.post<AuthResponse>('/auth/social-login', data);
         return response.data;
+    },
+    changePassword: async (data: any) => {
+        const response = await api.post('/auth/change-password', data);
+        return response.data;
     }
 };
 
@@ -239,6 +243,16 @@ export const UserService = {
 
     delete: async (id: string) => {
         await api.delete(`/users/${id}`);
+    },
+
+    getById: async (id: string) => {
+        const response = await api.get<User>(`/users/${id}`);
+        return response.data;
+    },
+
+    updateProfile: async (id: string, data: any) => {
+        const response = await api.put<User>(`/users/profile/${id}`, data);
+        return response.data;
     }
 };
 

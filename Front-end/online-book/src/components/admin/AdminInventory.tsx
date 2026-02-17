@@ -176,7 +176,7 @@ const AdminInventory = () => {
         />
       </div>
 
-      <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden bg-background">
+      <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden bg-card">
         <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/30">

@@ -129,7 +129,26 @@ const Navbar = ({ setSearchQuery: _setSearchQuery }: NavbarProps) => {
             </Button>
           </Link>
 
+          <Link to="/faq">
+            <Button
+              variant="ghost"
+              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+            >
+              FAQ
+            </Button>
+          </Link>
+
+          <Link to="/about">
+            <Button
+              variant="ghost"
+              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+            >
+              About Us
+            </Button>
+          </Link>
+
           <Link to="/contact">
+
             <Button
               variant="ghost"
               className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
