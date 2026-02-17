@@ -109,14 +109,7 @@ const Navbar = ({ setSearchQuery: _setSearchQuery }: NavbarProps) => {
             </Button>
           </Link>
 
-          <Link to="/reviews">
-            <Button
-              variant="ghost"
-              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
-            >
-              Reviews
-            </Button>
-          </Link>
+
 
           <Link to="/articles">
             <Button
@@ -124,6 +117,15 @@ const Navbar = ({ setSearchQuery: _setSearchQuery }: NavbarProps) => {
               className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
             >
               Articles
+            </Button>
+          </Link>
+
+          <Link to="/audio-books">
+            <Button
+              variant="ghost"
+              className="font-bold text-muted-foreground hover:text-primary uppercase tracking-wider text-xs"
+            >
+              Audio Book
             </Button>
           </Link>
 

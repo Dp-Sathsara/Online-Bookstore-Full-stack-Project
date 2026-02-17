@@ -22,6 +22,7 @@ import CategoriesPage from "./pages/CategoriesPage";
 import ReviewsPage from "./pages/ReviewsPage";
 import ArticlesPage from "./pages/ArticlesPage";
 import ContactPage from "./pages/ContactPage";
+import AudioBookPlayer from "./pages/AudioBookPlayer";
 
 // ✅ Admin Components & Pages
 import AdminLayout from "./components/admin/AdminLayout";
@@ -35,10 +36,6 @@ import AdminContactMessages from "./components/admin/AdminContactMessages";
 import AdminMessages from "@/components/admin/AdminMessages"; // Updated import name and path
 import AdminOrders from "@/components/admin/AdminOrders"; // ✅ Import AdminOrders
 import AdminFAQ from "@/components/admin/AdminFAQ"; // Placeholder until created
-import FAQPage from "./pages/FAQPage";
-import MessagesPage from "./pages/MessagesPage";
-// import TestPage from "./pages/TestPage";
-
 import ScrollToTop from "./components/ScrollToTop"; // ✅ Import ScrollToTop
 import OrderSuccessPage from "./pages/OrderSuccessPage"; // ✅ Import OrderSuccessPage
 
@@ -86,6 +83,10 @@ const Layout = () => {
           <Route path="/profile" element={<ProfileSettings />} />
           <Route path="/orders" element={<MyOrders />} />
           <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/articles" element={<ArticlesPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/audio-books" element={<AudioBookPlayer />} />
+
 
           {/* Admin Routes */}
           <Route path="/admin" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />

@@ -39,6 +39,7 @@ export interface Review {
     bookImage?: string;
     rating: number;
     comment: string;
+    adminReply?: string;
     date: string;
 }
 
@@ -48,14 +49,17 @@ export interface FAQ {
     answer: string;
 }
 
-export interface Contact {
+export interface ContactMessage {
     id: string;
     name: string;
     email: string;
     subject: string;
     message: string;
-    date: string;
+    adminReply?: string;
+    status: 'PENDING' | 'REPLIED';
+    createdAt: string;
 }
+
 
 export interface AuthResponse {
     token: string;
@@ -161,15 +165,24 @@ export const ReviewService = {
         const response = await api.get<Review[]>(`/reviews/book/${bookId}`);
         return response.data;
     },
-    create: async (data: any) => {
-        const response = await api.post<Review>('/reviews', data);
+    add: async (data: any) => {
+        const response = await api.post<Review>('/reviews/add', data);
         return response.data;
     },
-    delete: async (id: string) => {
-        const response = await api.delete(`/reviews/${id}`);
+    getAllAdmin: async () => {
+        const response = await api.get<Review[]>('/admin/reviews/all');
+        return response.data;
+    },
+    deleteAdmin: async (id: string) => {
+        const response = await api.delete(`/admin/reviews/${id}`);
+        return response.data;
+    },
+    replyAdmin: async (id: string, adminReply: string) => {
+        const response = await api.put<Review>(`/admin/reviews/reply/${id}`, { adminReply });
         return response.data;
     },
 };
+
 
 // --- 4. FAQ API ---
 export const FAQService = {
@@ -193,19 +206,24 @@ export const FAQService = {
 
 // --- 5. Contacts (Inquiries) API ---
 export const ContactService = {
-    getAll: async () => {
-        const response = await api.get<Contact[]>('/contacts');
+    getAllAdmin: async () => {
+        const response = await api.get<ContactMessage[]>('/admin/contact/all');
         return response.data;
     },
     create: async (data: any) => {
-        const response = await api.post<Contact>('/contacts', data);
+        const response = await api.post<ContactMessage>('/contact/send', data);
         return response.data;
     },
-    delete: async (id: string) => {
-        const response = await api.delete(`/contacts/${id}`);
+    replyAdmin: async (id: string, reply: string) => {
+        const response = await api.put<ContactMessage>(`/admin/contact/reply/${id}`, { reply });
+        return response.data;
+    },
+    deleteAdmin: async (id: string) => {
+        const response = await api.delete(`/admin/contact/${id}`);
         return response.data;
     },
 };
+
 
 // --- 6. User Management API ---
 export const UserService = {

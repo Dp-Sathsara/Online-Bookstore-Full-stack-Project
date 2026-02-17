@@ -5,6 +5,7 @@ import { useCartStore } from "@/store/userCartStore";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import BookCard from "./BookCard";
+import BookReviews from "./BookReviews";
 import axios from "axios";
 
 // Define the Book interface locally or import it, but it must handle _id
@@ -214,6 +215,12 @@ const BookDetails = () => {
           </div>
         </div>
       </div>
+
+      <BookReviews
+        bookId={id!}
+        bookTitle={book.title}
+        bookImage={book.image}
+      />
 
       {relatedBooks.length > 0 && (
         <div className="border-t border-primary/10 pt-12">
