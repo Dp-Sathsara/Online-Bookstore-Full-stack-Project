@@ -23,12 +23,15 @@ import ReviewsPage from "./pages/ReviewsPage";
 import ArticlesPage from "./pages/ArticlesPage";
 import ContactPage from "./pages/ContactPage";
 import AudioBookPlayer from "./pages/AudioBookPlayer";
+import FAQPage from "./pages/FAQPage";
+import AboutPage from "./pages/AboutPage";
+
 
 // ✅ Admin Components & Pages
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminInventory from "./components/admin/AdminInventory";
-import AdminAnalytics from "./components/admin/AdminAnalytics";
+
 import AdminUsers from "./components/admin/AdminUsers";
 import AdminReviews from "./components/admin/AdminReviews";
 import AdminArticles from "./components/admin/AdminArticles";
@@ -86,6 +89,8 @@ const Layout = () => {
           <Route path="/articles" element={<ArticlesPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/audio-books" element={<AudioBookPlayer />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/about" element={<AboutPage />} />
 
 
           {/* Admin Routes */}
@@ -94,7 +99,7 @@ const Layout = () => {
           <Route path="/admin/orders" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminOrders /></AdminLayout></ProtectedRoute>} />
           <Route path="/admin/messages" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminMessages /></AdminLayout></ProtectedRoute>} />
           <Route path="/admin/faq" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminFAQ /></AdminLayout></ProtectedRoute>} />
-          <Route path="/admin/analytics" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminAnalytics /></AdminLayout></ProtectedRoute>} />
+
           <Route path="/admin/users" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>} />
           <Route path="/admin/reviews" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminReviews /></AdminLayout></ProtectedRoute>} />
           <Route path="/admin/articles" element={<ProtectedRoute role="ADMIN"><AdminLayout><AdminArticles /></AdminLayout></ProtectedRoute>} />

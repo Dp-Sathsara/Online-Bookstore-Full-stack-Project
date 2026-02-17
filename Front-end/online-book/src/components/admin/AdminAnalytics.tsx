@@ -4,29 +4,99 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
 } from 'recharts';
 import { TrendingUp, Users, ShoppingBag, DollarSign, ArrowUpRight } from "lucide-react";
-// ✅ Badge Component එක මෙතනට Import කරන්න ඕනේ
 import { Badge } from "@/components/ui/badge";
+import api from "@/services/api";
+import { useState, useEffect } from "react";
 
-// ✅ Sample Data for Analytics
-const monthlyData = [
-  { name: 'Jan', revenue: 45000, orders: 120 },
-  { name: 'Feb', revenue: 52000, orders: 145 },
-  { name: 'Mar', revenue: 48000, orders: 130 },
-  { name: 'Apr', revenue: 61000, orders: 170 },
-  { name: 'May', revenue: 55000, orders: 155 },
-  { name: 'Jun', revenue: 67000, orders: 190 },
-];
+// Interfaces
+interface MonthlyData {
+  name: string;
+  revenue: number;
+  orders: number;
+}
 
-const categoryData = [
-  { name: 'Novels', value: 400 },
-  { name: 'Education', value: 300 },
-  { name: 'Sci-Fi', value: 200 },
-  { name: 'Biography', value: 150 },
-];
+interface CategoryData {
+  name: string;
+  value: number;
+  [key: string]: string | number; // Index signature for Recharts compatibility
+}
+
+interface AnalyticsStats {
+  totalRevenue: number;
+  totalOrders: number;
+  newCustomers: number;
+  conversionRate: number;
+  monthlyData: MonthlyData[];
+  categoryData: CategoryData[];
+}
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const AdminAnalytics = () => {
+  const [loading, setLoading] = useState(true);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsStats>({
+    totalRevenue: 0,
+    totalOrders: 0,
+    newCustomers: 0,
+    conversionRate: 0,
+    monthlyData: [],
+    categoryData: []
+  });
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get('/admin/analytics/stats');
+        setAnalyticsData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch analytics data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const stats = [
+    {
+      label: "Total Revenue",
+      value: `LKR ${analyticsData.totalRevenue.toLocaleString()}`,
+      icon: DollarSign,
+      trend: "+12.5%",
+      color: "text-blue-600"
+    },
+    {
+      label: "Total Orders",
+      value: analyticsData.totalOrders.toString(),
+      icon: ShoppingBag,
+      trend: "+8.2%",
+      color: "text-green-600"
+    },
+    {
+      label: "New Customers",
+      value: analyticsData.newCustomers.toString(),
+      icon: Users,
+      trend: "+15.3%",
+      color: "text-purple-600"
+    },
+    {
+      label: "Conversion Rate",
+      value: `${analyticsData.conversionRate}%`,
+      icon: TrendingUp,
+      trend: "+2.1%",
+      color: "text-orange-600"
+    },
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700 font-sans">
       {/* Header */}
@@ -37,13 +107,8 @@ const AdminAnalytics = () => {
 
       {/* Stats Summary Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: "Total Revenue", value: 'LKR 0', icon: DollarSign, trend: "+12.5%", color: "text-blue-600" },
-          { label: "Total Orders", value: "842", icon: ShoppingBag, trend: "+8.2%", color: "text-green-600" },
-          { label: "New Customers", value: "156", icon: Users, trend: "+15.3%", color: "text-purple-600" },
-          { label: "Conversion Rate", value: "3.2%", icon: TrendingUp, trend: "+2.1%", color: "text-orange-600" },
-        ].map((stat, i) => (
-          <Card key={i} className="border-none shadow-md rounded-[2rem] bg-background group hover:scale-[1.02] transition-transform">
+        {stats.map((stat, i) => (
+          <Card key={i} className="border-none shadow-md rounded-[2rem] bg-card group hover:scale-[1.02] transition-transform">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-3 bg-muted rounded-2xl group-hover:bg-primary/10 transition-colors">
@@ -62,13 +127,13 @@ const AdminAnalytics = () => {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="rounded-[2.5rem] border-none shadow-xl p-6 bg-background">
+        <Card className="rounded-[2.5rem] border-none shadow-xl p-6 bg-card">
           <CardHeader className="px-0 pt-0">
             <CardTitle className="text-lg font-black uppercase italic tracking-tight">Revenue Growth (6 Months)</CardTitle>
           </CardHeader>
           <div className="h-[300px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData}>
+              <AreaChart data={analyticsData.monthlyData}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
@@ -85,7 +150,7 @@ const AdminAnalytics = () => {
           </div>
         </Card>
 
-        <Card className="rounded-[2.5rem] border-none shadow-xl p-6 bg-background">
+        <Card className="rounded-[2.5rem] border-none shadow-xl p-6 bg-card">
           <CardHeader className="px-0 pt-0">
             <CardTitle className="text-lg font-black uppercase italic tracking-tight">Sales by Category</CardTitle>
           </CardHeader>
@@ -93,13 +158,13 @@ const AdminAnalytics = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={categoryData}
+                  data={analyticsData.categoryData}
                   innerRadius={60}
                   outerRadius={80}
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {categoryData.map((_entry, index) => (
+                  {analyticsData.categoryData.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -112,13 +177,13 @@ const AdminAnalytics = () => {
       </div>
 
       {/* Bottom Bar Chart */}
-      <Card className="rounded-[2.5rem] border-none shadow-xl p-8 bg-background">
+      <Card className="rounded-[2.5rem] border-none shadow-xl p-8 bg-card">
         <CardHeader className="px-0 pt-0">
           <CardTitle className="text-lg font-black uppercase italic tracking-tight">Order Volume per Month</CardTitle>
         </CardHeader>
         <div className="h-[300px] w-full mt-6">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData}>
+            <BarChart data={analyticsData.monthlyData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />

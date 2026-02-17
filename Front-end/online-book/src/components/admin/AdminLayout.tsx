@@ -1,21 +1,25 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Package,
-  BarChart3, Users, LogOut, Moon, Sun,
+  Users, LogOut, Moon, Sun,
   Star, FileText, Mail, Home, MessageSquare, HelpCircle
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider"; // Theme එක මාරු කිරීමට
 import { Button } from "@/components/ui/button";
 
+
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const { theme, setTheme } = useTheme(); // දැනට තියෙන theme එක ගන්නවා
+
+
+
 
   const menuItems = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/admin" },
     { label: "Inventory", icon: Package, path: "/admin/inventory" },
     { label: "Orders", icon: Package, path: "/admin/orders" },
-    { label: "Analytics", icon: BarChart3, path: "/admin/analytics" },
+
     { label: "Customers", icon: Users, path: "/admin/users" },
     { label: "Reviews", icon: Star, path: "/admin/reviews" },
     { label: "Articles", icon: FileText, path: "/admin/articles" },
@@ -71,10 +75,19 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </Button>
 
-          <button className="w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] text-destructive hover:bg-destructive/10 transition-all">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              console.log("Logout triggered");
+              localStorage.removeItem('user');
+              window.location.href = "/login";
+            }}
+            className="w-full flex items-center justify-start gap-4 px-6 py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all border border-transparent hover:border-red-200"
+          >
             <LogOut className="h-4 w-4" />
             Logout
-          </button>
+          </Button>
+
         </div>
       </aside>
 

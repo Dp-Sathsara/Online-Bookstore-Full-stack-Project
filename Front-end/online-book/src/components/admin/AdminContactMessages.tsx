@@ -74,7 +74,7 @@ const AdminContactMessages = () => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="flex justify-between items-center bg-card p-6 rounded-[2rem] shadow-sm border border-border">
                 <div>
                     <h2 className="text-3xl font-black uppercase tracking-tighter text-primary">Inquiries</h2>
                     <p className="text-muted-foreground font-medium mt-1">Manage user messages and feedback</p>
@@ -90,7 +90,7 @@ const AdminContactMessages = () => {
             </div>
 
             {/* Messages Table */}
-            <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden bg-background">
+            <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden bg-card">
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader className="bg-muted/30">

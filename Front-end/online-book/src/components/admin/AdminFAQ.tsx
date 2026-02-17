@@ -76,7 +76,7 @@ const AdminFAQ = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="flex justify-between items-center bg-card p-6 rounded-[2rem] shadow-sm border border-border">
                 <div>
                     <h2 className="text-3xl font-black uppercase tracking-tighter text-primary">FAQ Management</h2>
                     <p className="text-muted-foreground font-medium mt-1">Manage frequently asked questions</p>
@@ -120,7 +120,7 @@ const AdminFAQ = () => {
                 </Dialog>
             </div>
 
-            <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden bg-background">
+            <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden bg-card">
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader className="bg-muted/30">

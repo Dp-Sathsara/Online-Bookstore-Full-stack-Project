@@ -120,7 +120,7 @@ export default function AdminReviews() {
                 </div>
             </div>
 
-            <div className="bg-background rounded-[2rem] border-2 border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
+            <div className="bg-card rounded-[2rem] border-2 border-primary/5 shadow-2xl shadow-primary/5 overflow-hidden">
                 <Table>
                     <TableHeader className="bg-muted/30">
                         <TableRow className="border-none hover:bg-transparent">
